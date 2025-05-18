@@ -147,6 +147,69 @@ SmartSpend combines practical financial tools with clean UX and powerful data an
 
 Would you like a **starter repo layout**, **UI mockups**, or a **pitch deck** next?
 
+## Project Progress
+
+### Current Status: Phase 1 - Foundation Setup (In Progress)
+
+The initial structure of the SmartSpend project has been set up with the following components:
+
+#### Folder Structure
+
+```text
+FinancialApp/
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── assets/         # Images, icons, etc.
+│   │   ├── components/     # Reusable UI components
+│   │   ├── pages/          # Main application views
+│   │   ├── redux/          # Redux store and slices
+│   │   ├── styles/         # CSS and styling
+│   │   └── utils/          # Helper functions
+│   └── package.json        # Frontend dependencies
+├── server/                 # Node.js backend
+│   ├── src/
+│   │   ├── controllers/    # Request handlers
+│   │   ├── middlewares/    # Express middlewares
+│   │   ├── models/         # Database models
+│   │   ├── python/         # Python scripts for ML categorization
+│   │   ├── routes/         # API routes
+│   │   ├── services/       # Business logic
+│   │   └── utils/          # Helper functions
+│   └── package.json        # Backend dependencies
+├── docker/                 # Docker configuration
+│   ├── Dockerfile.client   # Frontend container definition
+│   └── Dockerfile.server   # Backend container definition
+├── .github/                # GitHub workflows
+│   └── workflows/          # CI/CD configuration
+├── docker-compose.yml      # Container orchestration
+└── package.json            # Root level dependencies
+```
+
+#### Implemented Features
+1. **Project Structure**
+   - Monorepo setup with client and server folders
+   - Docker containerization for development environment
+   - CI/CD workflow with GitHub Actions
+
+2. **Backend Progress**
+   - Express server with basic API structure
+   - User authentication routes and controllers
+   - Transaction management endpoints
+   - PostgreSQL database models defined
+   - Python script for CSV parsing and categorization
+
+3. **Frontend Progress**
+   - React application with router setup
+   - Redux store with auth, transaction, and category slices
+   - Basic component structure defined
+
+#### Next Steps
+1. Complete the basic UI components for authentication
+2. Implement the CSV upload and parsing functionality
+3. Create the dashboard visualizations with Recharts
+4. Set up the database seeding for development
+5. Implement end-to-end testing
+
 ## Backlog
 
 1. Infrastructure and Deployment Considerations
