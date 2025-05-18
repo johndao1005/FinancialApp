@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { Form, Input, Button, Card, Typography, Alert, Space } from 'antd';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { loginUser, clearError } from '../redux/slices/authSlice';
 
+const { Title, Text } = Typography;
+
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [formErrors, setFormErrors] = useState({});
-  
+  const [form] = Form.useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, isAuthenticated } = useSelector(state => state.auth);
@@ -26,101 +25,91 @@ const Login = () => {
     };
   }, [isAuthenticated, navigate, dispatch]);
 
-  const { email, password } = formData;
-
-  const onChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    
-    // Clear field-specific error when user starts typing
-    if (formErrors[e.target.name]) {
-      setFormErrors({
-        ...formErrors,
-        [e.target.name]: ''
-      });
-    }
-  };
-
-  const validate = () => {
-    const errors = {};
-    
-    if (!email) {
-      errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      errors.email = 'Email is invalid';
-    }
-    
-    if (!password) {
-      errors.password = 'Password is required';
-    }
-    
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const onSubmit = e => {
-    e.preventDefault();
-    
-    if (validate()) {
-      dispatch(loginUser({ email, password }));
-    }
+  const onFinish = (values) => {
+    dispatch(loginUser(values));
   };
 
   return (
-    <div className="auth-container">
-      <div className="card">
-        <h2 className="auth-title">Login to SmartSpend</h2>
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      minHeight: '100vh', 
+      padding: '20px'
+    }}>
+      <Card 
+        style={{ 
+          width: '100%', 
+          maxWidth: '420px', 
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          borderRadius: '8px'
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <Title level={2} style={{ margin: 0 }}>Login to SmartSpend</Title>
+          <Text type="secondary">Track your finances smarter</Text>
+        </div>
         
         {error && (
-          <div className="alert alert-danger">
-            {error}
-          </div>
+          <Alert
+            message="Error"
+            description={error}
+            type="error"
+            showIcon
+            style={{ marginBottom: '24px' }}
+          />
         )}
         
-        <form onSubmit={onSubmit}>
-          <div className="form-group">
-            <label className="form-label">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={email}
-              onChange={onChange}
-              className="form-control"
-              placeholder="Enter your email"
-            />
-            {formErrors.email && (
-              <div className="text-danger">{formErrors.email}</div>
-            )}
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={password}
-              onChange={onChange}
-              className="form-control"
-              placeholder="Enter your password"
-            />
-            {formErrors.password && (
-              <div className="text-danger">{formErrors.password}</div>
-            )}
-          </div>
-          
-          <button
-            type="submit"
-            className="btn"
-            style={{ width: '100%' }}
-            disabled={loading}
+        <Form
+          form={form}
+          name="login"
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          layout="vertical"
+          size="large"
+        >
+          <Form.Item
+            name="email"
+            rules={[
+              { required: true, message: 'Please input your email!' },
+              { type: 'email', message: 'Please enter a valid email address!' }
+            ]}
           >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+            <Input 
+              prefix={<UserOutlined />} 
+              placeholder="Email Address" 
+            />
+          </Form.Item>
+          
+          <Form.Item
+            name="password"
+            rules={[{ required: true, message: 'Please input your password!' }]}
+          >
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="Password"
+            />
+          </Form.Item>
+          
+          <Form.Item>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              loading={loading}
+              block
+            >
+              Log in
+            </Button>
+          </Form.Item>
+        </Form>
         
-        <div className="auth-footer">
-          Don't have an account? <Link to="/register">Register</Link>
+        <div style={{ textAlign: 'center' }}>
+          <Space>
+            <Text>Don't have an account?</Text>
+            <Link to="/register">Register</Link>
+          </Space>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

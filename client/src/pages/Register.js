@@ -1,18 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { 
+  Form, 
+  Input, 
+  Button, 
+  Card, 
+  Typography, 
+  Alert, 
+  Space, 
+  Row, 
+  Col 
+} from 'antd';
+import { 
+  UserOutlined, 
+  MailOutlined, 
+  LockOutlined 
+} from '@ant-design/icons';
 import { registerUser, clearError } from '../redux/slices/authSlice';
 
+const { Title, Text } = Typography;
+
 const Register = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
-  const [formErrors, setFormErrors] = useState({});
-  
+  const [form] = Form.useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, isAuthenticated } = useSelector(state => state.auth);
@@ -29,166 +39,144 @@ const Register = () => {
     };
   }, [isAuthenticated, navigate, dispatch]);
 
-  const { firstName, lastName, email, password, confirmPassword } = formData;
-
-  const onChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    
-    // Clear field-specific error when user starts typing
-    if (formErrors[e.target.name]) {
-      setFormErrors({
-        ...formErrors,
-        [e.target.name]: ''
-      });
-    }
-  };
-
-  const validate = () => {
-    const errors = {};
-    
-    if (!firstName) {
-      errors.firstName = 'First name is required';
-    }
-    
-    if (!lastName) {
-      errors.lastName = 'Last name is required';
-    }
-    
-    if (!email) {
-      errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      errors.email = 'Email is invalid';
-    }
-    
-    if (!password) {
-      errors.password = 'Password is required';
-    } else if (password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
-    
-    if (password !== confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
-    
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const onSubmit = e => {
-    e.preventDefault();
-    
-    if (validate()) {
-      dispatch(registerUser({ firstName, lastName, email, password }));
-    }
+  const onFinish = (values) => {
+    dispatch(registerUser({
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      password: values.password
+    }));
   };
 
   return (
-    <div className="auth-container">
-      <div className="card">
-        <h2 className="auth-title">Create an Account</h2>
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      minHeight: '100vh', 
+      padding: '20px'
+    }}>
+      <Card 
+        style={{ 
+          width: '100%', 
+          maxWidth: '550px', 
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          borderRadius: '8px'
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <Title level={2} style={{ margin: 0 }}>Create an Account</Title>
+          <Text type="secondary">Join SmartSpend to manage your finances</Text>
+        </div>
         
         {error && (
-          <div className="alert alert-danger">
-            {error}
-          </div>
+          <Alert
+            message="Error"
+            description={error}
+            type="error"
+            showIcon
+            style={{ marginBottom: '24px' }}
+          />
         )}
         
-        <form onSubmit={onSubmit}>
-          <div className="row">
-            <div className="col">
-              <div className="form-group">
-                <label className="form-label">First Name</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={firstName}
-                  onChange={onChange}
-                  className="form-control"
-                  placeholder="Your first name"
+        <Form
+          form={form}
+          name="register"
+          onFinish={onFinish}
+          layout="vertical"
+          size="large"
+        >
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="firstName"
+                rules={[{ required: true, message: 'Please input your first name!' }]}
+              >
+                <Input 
+                  prefix={<UserOutlined />} 
+                  placeholder="First Name" 
                 />
-                {formErrors.firstName && (
-                  <div className="text-danger">{formErrors.firstName}</div>
-                )}
-              </div>
-            </div>
-            
-            <div className="col">
-              <div className="form-group">
-                <label className="form-label">Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={lastName}
-                  onChange={onChange}
-                  className="form-control"
-                  placeholder="Your last name"
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="lastName"
+                rules={[{ required: true, message: 'Please input your last name!' }]}
+              >
+                <Input 
+                  prefix={<UserOutlined />} 
+                  placeholder="Last Name" 
                 />
-                {formErrors.lastName && (
-                  <div className="text-danger">{formErrors.lastName}</div>
-                )}
-              </div>
-            </div>
-          </div>
+              </Form.Item>
+            </Col>
+          </Row>
           
-          <div className="form-group">
-            <label className="form-label">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={email}
-              onChange={onChange}
-              className="form-control"
-              placeholder="Your email address"
-            />
-            {formErrors.email && (
-              <div className="text-danger">{formErrors.email}</div>
-            )}
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={password}
-              onChange={onChange}
-              className="form-control"
-              placeholder="Choose a password"
-            />
-            {formErrors.password && (
-              <div className="text-danger">{formErrors.password}</div>
-            )}
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={confirmPassword}
-              onChange={onChange}
-              className="form-control"
-              placeholder="Confirm your password"
-            />
-            {formErrors.confirmPassword && (
-              <div className="text-danger">{formErrors.confirmPassword}</div>
-            )}
-          </div>
-          
-          <button
-            type="submit"
-            className="btn"
-            style={{ width: '100%' }}
-            disabled={loading}
+          <Form.Item
+            name="email"
+            rules={[
+              { required: true, message: 'Please input your email!' },
+              { type: 'email', message: 'Please enter a valid email address!' }
+            ]}
           >
-            {loading ? 'Creating Account...' : 'Register'}
-          </button>
-        </form>
+            <Input 
+              prefix={<MailOutlined />} 
+              placeholder="Email Address" 
+            />
+          </Form.Item>
+          
+          <Form.Item
+            name="password"
+            rules={[
+              { required: true, message: 'Please input your password!' },
+              { min: 6, message: 'Password must be at least 6 characters!' }
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="Password"
+            />
+          </Form.Item>
+          
+          <Form.Item
+            name="confirmPassword"
+            dependencies={['password']}
+            rules={[
+              { required: true, message: 'Please confirm your password!' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('The two passwords do not match!'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined />}
+              placeholder="Confirm Password"
+            />
+          </Form.Item>
+          
+          <Form.Item>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              loading={loading}
+              block
+            >
+              {loading ? 'Creating Account...' : 'Register'}
+            </Button>
+          </Form.Item>
+        </Form>
         
-        <div className="auth-footer">
-          Already have an account? <Link to="/login">Login</Link>
+        <div style={{ textAlign: 'center' }}>
+          <Space>
+            <Text>Already have an account?</Text>
+            <Link to="/login">Login</Link>
+          </Space>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
