@@ -24,12 +24,16 @@ const authRoutes = require('./routes/auth.routes');
 const transactionRoutes = require('./routes/transaction.routes');
 const userRoutes = require('./routes/user.routes');
 const categoryRoutes = require('./routes/category.routes');
+const budgetRoutes = require('./routes/budget.routes');
+const goalRoutes = require('./routes/goal.routes');
 
 // Apply routes
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/budgets', budgetRoutes);
+app.use('/api/goals', goalRoutes);
 
 // Root route
 app.get('/', (req, res) => {

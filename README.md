@@ -1,31 +1,33 @@
-# Finanical App
-
-Here is the **Project Report** for your **Personal Finance Tracker** side project, tailored for both business users and technical stakeholders. This includes the use case, implementation steps, and potential business expansion paths.
-
----
-
-# 💰 Project Report: Personal Finance Tracker
-
----
-
-## 🧩 Overview
-
-**Project Name:** SmartSpend – Personal Finance Tracker
-**Core Stack:** React + Redux, Express (Node.js), PostgreSQL, Docker, Recharts, Python (Pandas)
-
-### 🎯 Purpose
+# SmartSpend - Personal Finance Tracker
 
 SmartSpend helps users **track, categorize, and understand their spending habits** by importing bank statements and visualizing financial trends over time. Designed to simplify personal finance management, this app reduces the need for manual budgeting and provides users with a clear picture of where their money goes.
 
----
+![SmartSpend Logo](client/public/logo192.png)
 
-## 💼 Business Use Case
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [API Documentation](#api-documentation)
+- [UI Components](#ui-components)
+- [Development Status](#development-status)
+- [Future Improvements](#future-improvements)
+
+## Overview
+
+SmartSpend is a comprehensive personal finance management application that allows users to:
+- Track expenses and income across multiple accounts
+- Import transactions from bank statement CSV files
+- Categorize transactions automatically
+- View interactive charts and analytics on spending patterns
+- Set budget goals and track progress
 
 Many people struggle to budget or monitor their expenses due to:
-
-* Inconsistent banking interfaces
-* Lack of automated categorization
-* No centralized view across accounts
+- Inconsistent banking interfaces
+- Lack of automated categorization
+- No centralized view across accounts
 
 **SmartSpend addresses this by offering:**
 
@@ -49,9 +51,11 @@ This type of app is valuable for:
 | 📥 Bank Statement Import           | CSV or OFX upload support; handles multiple bank formats                 |
 | 🏷️ Automated Categorization       | Categorize expenses using a Python engine with customizable rules        |
 | 📊 Interactive Dashboards          | Recharts-powered visualizations for monthly trends, top categories, etc. |
-| 🧠 Learning Engine (Future)        | Learns from user overrides and improves classification accuracy          |
-| 💱 Multi-Currency Support (Future) | Convert transactions into base currency                                  |
+| 💰 Budget Management               | Create and track category-specific and overall budget limits             |
+| 🎯 Financial Goals                 | Set saving, debt, investment and other financial goals with tracking     |
 | 🔐 Secure User Management          | Login, encrypted data storage, token-based sessions                      |
+| 💱 Multi-Currency Support (Future) | Convert transactions into base currency                                  |
+| 🧠 Learning Engine (Future)        | Learns from user overrides and improves classification accuracy          |
 
 ---
 
@@ -149,69 +153,11 @@ Would you like a **starter repo layout**, **UI mockups**, or a **pitch deck** ne
 
 ## Project Progress
 
-### Current Status: Phase 1 - Foundation Setup (Completed)
+### Current Status: Phase 2 - Budget Management and Financial Goals (Completed)
 
-The structure of the SmartSpend project has been set up with the following components:
+The SmartSpend project has successfully completed Phase 2 implementation, adding significant new functionality to help users manage their finances more effectively.
 
-#### Folder Structure
-
-```text
-FinancialApp/
-├── client/                 # React frontend
-│   ├── src/
-│   │   ├── assets/         # Images, icons, etc.
-│   │   ├── components/     # Reusable UI components
-│   │   │   ├── Navbar.js   # Navigation component
-│   │   │   └── PrivateRoute.js # Auth protection
-│   │   ├── pages/          # Main application views
-│   │   │   ├── Dashboard.js     # Main visualization dashboard
-│   │   │   ├── Login.js         # Authentication
-│   │   │   ├── Profile.js       # User profile management
-│   │   │   ├── Register.js      # User registration
-│   │   │   ├── Transactions.js  # Transaction management
-│   │   │   └── UploadStatement.js # CSV import page
-│   │   ├── redux/          # Redux store and slices
-│   │   │   ├── store.js
-│   │   │   └── slices/
-│   │   │       ├── authSlice.js        # Authentication state
-│   │   │       ├── categorySlice.js    # Categories state
-│   │   │       └── transactionSlice.js # Transactions state
-│   │   ├── styles/         # CSS and styling
-│   │   └── utils/          # Helper functions
-│   └── package.json        # Frontend dependencies
-├── server/                 # Node.js backend
-│   ├── src/
-│   │   ├── controllers/    # Request handlers
-│   │   │   ├── auth.controller.js      # Authentication logic
-│   │   │   ├── transaction.controller.js # Transaction management
-│   │   │   └── user.controller.js      # User profile management
-│   │   ├── middlewares/    # Express middlewares
-│   │   │   ├── auth.middleware.js      # JWT verification
-│   │   │   └── validation.middleware.js # Input validation
-│   │   ├── models/         # Database models
-│   │   │   ├── category.model.js       # Categories schema
-│   │   │   ├── index.js                # DB initialization
-│   │   │   ├── transaction.model.js    # Transactions schema
-│   │   │   └── user.model.js           # User schema
-│   │   ├── python/         # Python scripts for ML categorization
-│   │   │   └── process_csv.py          # CSV parsing and categorization
-│   │   ├── routes/         # API routes
-│   │   │   ├── auth.routes.js          # Authentication endpoints
-│   │   │   ├── transaction.routes.js   # Transaction endpoints
-│   │   │   └── user.routes.js          # User profile endpoints
-│   │   ├── services/       # Business logic
-│   │   └── utils/          # Helper functions
-│   └── package.json        # Backend dependencies
-├── docker/                 # Docker configuration
-│   ├── Dockerfile.client   # Frontend container definition
-│   └── Dockerfile.server   # Backend container definition
-├── .github/                # GitHub workflows
-│   └── workflows/          # CI/CD configuration
-├── docker-compose.yml      # Container orchestration
-└── package.json            # Root level dependencies
-```
-
-#### Implemented Features
+#### Phase 1 Achievements (Completed)
 
 1. **Project Structure**
    - Monorepo setup with client and server folders
@@ -232,54 +178,410 @@ FinancialApp/
    - Protected routes for authenticated users
    - Responsive UI components with clean CSS styling
 
-4. **Specific UI Components**
-   - Login and Registration pages with validation
-   - Dashboard with visualizations using Recharts
-   - Transaction management with filtering and editing capabilities
-   - CSV upload for bank statement import
-   - User profile management with settings
+#### Phase 2 Achievements (Completed)
 
-#### Next Steps
+1. **Budget Management**
+   - Created comprehensive budget model with support for different time periods (daily, weekly, monthly, yearly, custom)
+   - Implemented budget controller with full CRUD operations
+   - Added budget progress tracking functionality
+   - Developed intuitive UI for budget creation and monitoring
+   - Integrated category-specific budgeting to track spending by category
+   - Added visual progress indicators showing budget utilization
+   - Implemented budget filtering and search capabilities
 
-1. ✅ Complete the basic UI components for authentication
-2. ✅ Implement the CSV upload and parsing functionality
-3. ✅ Create the dashboard visualizations with Recharts
-4. Set up the database seeding for development
-5. Implement end-to-end testing
+2. **Financial Goals**
+   - Created goal model with support for different goal types (saving, debt, investment, expense, other)
+   - Implemented goal contribution tracking system
+   - Developed UI for goal creation, editing, and monitoring
+   - Added progress visualization with completion percentage and timeline
+   - Implemented contribution management with add/delete functionality
+   - Created goal status tracking (in progress, completed, abandoned)
+   - Added target date projections based on contribution history
 
-Current focus: Preparing for Phase 2 with database initialization and seed data.
+3. **Backend Enhancements**
+   - Added new models: `Budget`, `Goal`, and `GoalContribution`
+   - Created controllers with comprehensive business logic for budget and goal management
+   - Implemented API endpoints for budget progress tracking
+   - Added contribution management for financial goals
+   - Updated database relationships to support new features
 
-## Backlog
+4. **Frontend Improvements**
+   - Added new Redux slices for budget and goal state management
+   - Created dedicated pages for Budget and Goal management
+   - Implemented data visualization with Progress components
+   - Added form validation for budget and goal creation/editing
+   - Updated navigation to include new features
+   - Implemented responsive layouts for all new components
 
-1. Infrastructure and Deployment Considerations
-Consider using Azure App Service for hosting the application, which would provide scalability and reliability
-Implement CI/CD pipelines for automated testing and deployment
-Add containerization with Azure Container Apps for easy scaling
-2. Security Enhancements
-Implement multi-factor authentication for added security
-Add comprehensive data encryption both at rest and in transit
-Consider compliance with financial data regulations (GDPR, CCPA)
-3. Technical Improvements
-Add real-time notifications using WebSockets
-Implement progressive web app (PWA) functionality for offline access
-Consider using TypeScript for improved type safety and developer experience
-Add comprehensive automated testing (unit, integration, and E2E)
-4. Feature Additions
-Tax preparation assistance feature (categorizing tax-deductible expenses)
-Financial goal setting and tracking module
-Document storage for financial paperwork (receipts, warranties)
-Financial education resources integrated into the dashboard
-Collaboration features for family finance management
-5. AI and Machine Learning
-Expand the AI capabilities to include predictive spending analysis
-Add anomaly detection for unusual transactions (potential fraud)
-Implement personalized financial advice based on spending patterns
-6. User Experience
-Add accessibility features for users with disabilities
-Develop a dark mode option
-Implement guided onboarding experiences for new users
-Add customizable dashboard widgets
-7. Integration Possibilities
-Integrate with tax preparation software
-Connect with investment tracking platforms
-Add support for cryptocurrency transactions
+#### Current Work in Progress: Phase 3 Implementation
+
+1. **Enhanced Reporting**
+   - Improving data visualization with more chart types
+   - Adding time-based filtering options
+   - Developing comparative analysis tools
+
+2. **Multiple Account Support**
+   - Adding account models and management functionality
+   - Implementing UI for multi-account dashboards
+
+3. **Machine Learning Improvements**
+   - Refining transaction categorization accuracy
+   - Implementing spending pattern detection
+   - Adding anomaly detection for unusual transactions
+
+## Tech Stack
+
+### Frontend
+
+- **React**: UI library for building the user interface
+- **Redux Toolkit**: State management
+- **Ant Design (antd)**: UI component library for a modern look and feel
+- **Recharts**: Data visualization library for charts and graphs
+- **Axios**: HTTP client for API requests
+
+### Backend
+
+- **Node.js**: JavaScript runtime
+- **Express**: Web framework
+- **Sequelize**: ORM for database interactions
+- **SQLite**: Database (for development)
+- **PostgreSQL**: Database (for production)
+- **JWT**: Authentication mechanism
+- **Python**: Used for data processing and ML-based categorization
+
+## Development Status
+
+### Current Status: Phase 2 Completed, Moving to Phase 3
+
+#### Recently Completed Phase 2 Implementations
+
+1. **Backend API Enhancements**
+   - Added missing logout function to auth controller
+   - Implemented Category controller with full CRUD operations
+   - Created Category routes for API endpoints
+   - Fixed model relationships for user-created categories and subcategories
+   - Added default categories seeding functionality
+   - Changed server port from 5000 to 5001 to avoid conflicts
+   - Configured CORS properly to allow client requests
+
+2. **Frontend Improvements**
+   - Configured axios utility for centralized API request handling
+   - Fixed token handling in all Redux slices
+   - Updated Redux slices to use the configured axios instance
+   - Updated API request endpoints to match backend changes
+
+3. **Database Changes**
+   - Fixed field definitions in models (userId in Category, userId and categoryId in Transaction)
+   - Installed SQLite for database development
+
+4. **Phase 2 Implementation Achievements**
+   - Created budget and goal models with comprehensive fields and relationships
+   - Implemented controllers for budget and goal management with full CRUD operations
+   - Added API endpoints for budget and goal tracking
+   - Created Redux slices for budget and goal state management
+   - Developed UI components for budget and goal visualization
+   - Implemented contribution tracking for financial goals
+   - Added progress indicators for budget utilization
+
+#### Current Work in Progress: Phase 3 Implementation
+
+1. **Enhanced Reporting**
+   - Improving data visualization with more chart types
+   - Adding time-based filtering options
+   - Developing comparative analysis tools
+
+2. **Multiple Account Support**
+   - Adding account models and management functionality
+   - Implementing UI for multi-account dashboards
+
+3. **Machine Learning Improvements**
+   - Refining transaction categorization accuracy
+   - Implementing spending pattern detection
+   - Adding anomaly detection for unusual transactions
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+- Python 3.8+ (for ML categorization)
+- Git
+
+### Installation
+
+#### 1. Clone the repository
+
+```bash
+git clone https://github.com/yourusername/FinancialApp.git
+cd FinancialApp
+```
+
+#### 2. Install dependencies
+
+```bash
+# Install root dependencies
+npm install
+
+# Install client dependencies
+cd client
+npm install
+cd ..
+
+# Install server dependencies
+cd server
+npm install
+cd ..
+```
+
+#### 3. Set up environment variables
+
+Create a `.env` file in the server directory:
+
+```bash
+# server/.env
+PORT=5001
+JWT_SECRET=your_jwt_secret_key
+DB_PATH=./database.sqlite
+NODE_ENV=development
+```
+
+#### 4. Seed the database
+
+```bash
+cd server
+npm run seed
+```
+
+#### 5. Start the application
+
+```bash
+# Start both client and server using concurrently
+npm run dev
+
+# Or start them separately
+# Terminal 1 - Start server
+cd server
+npm run dev
+
+# Terminal 2 - Start client
+cd client
+npm start
+```
+
+The client will run on `http://localhost:3000` and the server on `http://localhost:5001`.
+
+### Using Docker (Optional)
+
+If you prefer using Docker, you can use the provided Docker configuration:
+
+```bash
+# Build and start containers
+docker-compose up -d
+
+# Stop containers
+docker-compose down
+```
+
+## API Documentation
+
+The backend provides the following RESTful API endpoints:
+
+### Authentication API
+
+| Method | Endpoint             | Description                        | Request Body                               | Response                          |
+|--------|----------------------|------------------------------------|-------------------------------------------|-----------------------------------|
+| POST   | /api/auth/register   | Register a new user                | `{name, email, password}`                  | `{token, user}`                   |
+| POST   | /api/auth/login      | Login with existing credentials    | `{email, password}`                        | `{token, user}`                   |
+| POST   | /api/auth/logout     | Logout the current user            | None                                       | `{message: 'Logout successful'}`  |
+| GET    | /api/auth/user       | Get the authenticated user data    | None (requires auth token)                 | `{user}`                          |
+
+### Transactions API
+
+| Method | Endpoint                      | Description                           | Request Body / Params                      | Response                          |
+|--------|-------------------------------|---------------------------------------|-------------------------------------------|-----------------------------------|
+| GET    | /api/transactions             | Get all user transactions             | Query params: `limit`, `offset`, `sortBy`  | `{transactions, count}`           |
+| GET    | /api/transactions/:id         | Get a specific transaction            | URL param: `id`                            | `{transaction}`                   |
+| POST   | /api/transactions             | Create a new transaction              | `{amount, description, date, categoryId}`  | `{transaction}`                   |
+| PUT    | /api/transactions/:id         | Update an existing transaction        | `{amount, description, date, categoryId}`  | `{transaction}`                   |
+| DELETE | /api/transactions/:id         | Delete a transaction                  | URL param: `id`                            | `{message: 'Transaction deleted'}`|
+
+### Categories API
+
+| Method | Endpoint                     | Description                           | Request Body / Params                      | Response                          |
+|--------|------------------------------|---------------------------------------|-------------------------------------------|-----------------------------------|
+| GET    | /api/categories              | Get all categories                    | None (requires auth token)                 | `{categories}`                    |
+| GET    | /api/categories/:id          | Get a specific category               | URL param: `id`                            | `{category}`                      |
+| POST   | /api/categories              | Create a new category                 | `{name, icon, color}`                      | `{category}`                      |
+| PUT    | /api/categories/:id          | Update an existing category           | `{name, icon, color}`                      | `{category}`                      |
+| DELETE | /api/categories/:id          | Delete a category                     | URL param: `id`                            | `{message: 'Category deleted'}`   |
+
+### User API
+
+| Method | Endpoint                  | Description                          | Request Body / Params                       | Response                         |
+|--------|---------------------------|--------------------------------------|-------------------------------------------|----------------------------------|
+| GET    | /api/users/profile        | Get user profile                     | None (requires auth token)                 | `{user}`                         |
+| PUT    | /api/users/profile        | Update user profile                  | `{name, email, ...profileData}`            | `{user}`                         |
+| PUT    | /api/users/password       | Change user password                 | `{currentPassword, newPassword}`           | `{message: 'Password updated'}`  |
+
+### Budget API
+
+| Method | Endpoint                  | Description                          | Request Body / Params                      | Response                         |
+|--------|---------------------------|--------------------------------------|-------------------------------------------|----------------------------------|
+| GET    | /api/budgets              | Get all budgets                      | None (requires auth token)                 | `{budgets}`                      |
+| GET    | /api/budgets/:id          | Get a specific budget                | URL param: `id`                            | `{budget}`                       |
+| GET    | /api/budgets/:id/progress | Get budget spending progress         | URL param: `id`                            | `{progress, total, percentage}`  |
+| POST   | /api/budgets              | Create a new budget                  | `{name, amount, period, categoryId}`       | `{budget}`                       |
+| PUT    | /api/budgets/:id          | Update an existing budget            | `{name, amount, period, categoryId}`       | `{budget}`                       |
+| DELETE | /api/budgets/:id          | Delete a budget                      | URL param: `id`                            | `{message: 'Budget deleted'}`    |
+
+### Goals API
+
+| Method | Endpoint                           | Description                           | Request Body / Params                      | Response                          |
+|--------|-----------------------------------|---------------------------------------|-------------------------------------------|-----------------------------------|
+| GET    | /api/goals                        | Get all goals                         | None (requires auth token)                 | `{goals}`                         |
+| GET    | /api/goals/:id                    | Get a specific goal                   | URL param: `id`                            | `{goal}`                          |
+| POST   | /api/goals                        | Create a new goal                     | `{name, targetAmount, type, targetDate}`   | `{goal}`                          |
+| PUT    | /api/goals/:id                    | Update an existing goal               | `{name, targetAmount, type, targetDate}`   | `{goal}`                          |
+| DELETE | /api/goals/:id                    | Delete a goal                         | URL param: `id`                            | `{message: 'Goal deleted'}`       |
+| POST   | /api/goals/:id/contributions      | Add a contribution to a goal          | `{amount, date, notes}`                    | `{contribution}`                  |
+| DELETE | /api/goals/:id/contributions/:cId | Delete a contribution                 | URL params: `id`, `contributionId`         | `{message: 'Contribution deleted'}` |
+
+## UI Components
+
+The frontend utilizes Ant Design (antd) components to create a modern and responsive user interface. Key UI components include:
+
+### Authentication Pages
+
+- **Login**: Allows users to authenticate with their email and password
+- **Register**: Enables new users to create an account
+
+### Dashboard Components
+
+- **Summary Cards**: Display key financial metrics (income, expenses, balance)
+- **Transaction Chart**: Visualizes spending patterns over time
+- **Category Distribution**: Pie chart showing spending by category
+- **Recent Transactions**: List of most recent financial activities
+
+### Transaction Management
+
+- **Transaction List**: Interactive table with filtering and sorting
+- **Transaction Form**: Modal for adding and editing transaction details
+- **CSV Import**: Tool for importing transactions from bank statements
+
+### Category Management
+
+- **Category List**: View and manage expense categories
+- **Category Form**: Create and edit categories with color coding and icons
+
+### Budget Management
+
+- **Budget Dashboard**: Overview of all active budgets with progress indicators
+- **Budget Form**: Create and edit budgets with category selection and period options
+- **Budget Progress**: Visual representation of spending against budget limits
+- **Budget Filtering**: Filter budgets by category, time period, or status
+
+### Goal Management
+
+- **Goal Dashboard**: Visual overview of financial goals with progress tracking
+- **Goal Form**: Create and edit goals with target amounts and dates
+- **Contribution Management**: Add and track contributions towards goals
+- **Goal Timeline**: Projected completion dates based on contribution history
+
+## Phase 2 Implementation - Completed
+
+The following key features from Phase 2 have been successfully implemented:
+
+### 1. Budget Management System ✅
+
+- **Budget Creation**: Users can now set monthly or custom period budgets
+- **Category Budgets**: Spending limits can be set for specific categories
+- **Budget Tracking**: Visual progress bars show budget usage in real-time
+- **Budget Periods**: Support for daily, weekly, monthly, yearly, and custom budget periods
+
+### 2. Financial Goals Tracking ✅
+
+- **Goal Setting**: Users can create short and long-term financial goals
+- **Goal Categories**: Support for saving, debt reduction, investment, and expense goals
+- **Progress Tracking**: Visual representation of progress towards goals
+- **Contribution Management**: Track individual contributions towards goals
+- **Timeline Projections**: Calculate estimated completion dates based on contribution history
+
+## Upcoming Phase 3 Features
+
+### 1. Enhanced Reporting and Analytics
+
+- **Custom Date Ranges**: View financial data across any time period
+- **Comparative Analysis**: Compare spending between different periods
+- **Spending Insights**: AI-generated observations about spending patterns
+- **Export Options**: Generate PDF reports and spreadsheet exports
+
+### 2. Multiple Account Management
+
+- **Account Creation**: Add and manage multiple financial accounts
+- **Account Types**: Checking, savings, credit cards, investments
+- **Consolidated View**: See combined financial position across accounts
+- **Account-specific Reporting**: Filter analysis by specific accounts
+
+### 3. Machine Learning Enhancements
+
+- **Advanced Categorization**: Improve accuracy of transaction categorization
+- **Spending Prediction**: Forecast future expenses based on patterns
+- **Anomaly Detection**: Identify unusual spending patterns
+- **Personalized Recommendations**: Suggest budgeting improvements
+
+## Contribution Guidelines
+
+We welcome contributions to the SmartSpend project! Here's how you can contribute:
+
+### 1. Fork the Repository
+
+Start by forking the repository and then clone your fork:
+
+```bash
+git clone https://github.com/your-username/FinancialApp.git
+cd FinancialApp
+```
+
+### 2. Create a Branch
+
+Create a branch for your feature or bugfix:
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+### 3. Make Changes
+
+Implement your changes, following these guidelines:
+
+- Follow the existing code style
+- Write clear, commented, and clean code
+- Test your changes thoroughly
+
+### 4. Commit and Push
+
+Commit your changes with a descriptive message:
+
+```bash
+git commit -m "Add feature: your feature description"
+git push origin feature/your-feature-name
+```
+
+### 5. Submit a Pull Request
+
+Go to the original repository and submit a pull request from your feature branch to the main branch.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+## Contact
+
+For questions or support, please reach out to the project maintainers or open an issue on GitHub.
+
+---
+
+Last updated: May 18, 2025

@@ -8,6 +8,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import UploadStatement from './pages/UploadStatement';
 import Profile from './pages/Profile';
+import Budgets from './pages/Budgets';
+import Goals from './pages/Goals';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import './styles/App.css';
@@ -39,6 +41,8 @@ function App() {
                     <Route path="/transactions" element={<Transactions />} />
                     <Route path="/upload" element={<UploadStatement />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/budgets" element={<Budgets />} />
+                    <Route path="/goals" element={<Goals />} />
                   </Route>
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>

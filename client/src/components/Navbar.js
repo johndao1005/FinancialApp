@@ -9,7 +9,9 @@ import {
   UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
-  MenuUnfoldOutlined
+  MenuUnfoldOutlined,
+  DollarOutlined,
+  FlagOutlined
 } from '@ant-design/icons';
 import { logout } from '../redux/slices/authSlice';
 
@@ -47,6 +49,16 @@ const Navbar = () => {
       key: '/transactions',
       icon: <TransactionOutlined />,
       label: <Link to="/transactions">Transactions</Link>,
+    },
+    {
+      key: '/budgets',
+      icon: <DollarOutlined />,
+      label: <Link to="/budgets">Budgets</Link>,
+    },
+    {
+      key: '/goals',
+      icon: <FlagOutlined />,
+      label: <Link to="/goals">Goals</Link>,
     },
     {
       key: '/upload',

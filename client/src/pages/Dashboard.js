@@ -7,7 +7,8 @@ import {
   Typography, 
   Statistic, 
   Spin, 
-  Divider 
+  Divider,
+  Space
 } from 'antd';
 import { 
   ArrowUpOutlined, 
@@ -30,6 +31,7 @@ import {
   Bar 
 } from 'recharts';
 import { fetchTransactions } from '../redux/slices/transactionSlice';
+import QuickTransactionEntry from '../components/QuickTransactionEntry';
 
 const { Title } = Typography;
 
@@ -179,7 +181,16 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: '24px' }}>
-      <Typography.Title level={2}>Financial Dashboard</Typography.Title>
+      <Row align="middle" justify="space-between" style={{ marginBottom: '16px' }}>
+        <Col>
+          <Typography.Title level={2}>Financial Dashboard</Typography.Title>
+        </Col>
+        <Col>
+          <QuickTransactionEntry 
+            onSuccess={() => dispatch(fetchTransactions({}))} 
+          />
+        </Col>
+      </Row>
       
       {/* Summary Cards */}
       <Row gutter={[16, 16]}>

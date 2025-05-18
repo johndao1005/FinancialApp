@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     description: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     merchant: {
       type: DataTypes.STRING,
@@ -57,6 +57,18 @@ module.exports = (sequelize, DataTypes) => {
         model: 'categories',
         key: 'id'
       }
+    },
+    isRecurring: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    recurringFrequency: {
+      type: DataTypes.ENUM('daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'annually'),
+      allowNull: true
+    },
+    recurringEndDate: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     timestamps: true

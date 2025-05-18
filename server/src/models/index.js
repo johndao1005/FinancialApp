@@ -15,6 +15,9 @@ const sequelize = new Sequelize({
 const User = require('./user.model')(sequelize, DataTypes);
 const Transaction = require('./transaction.model')(sequelize, DataTypes);
 const Category = require('./category.model')(sequelize, DataTypes);
+const Budget = require('./budget.model')(sequelize, DataTypes);
+const Goal = require('./goal.model')(sequelize, DataTypes);
+const GoalContribution = require('./goalContribution.model')(sequelize, DataTypes);
 
 // Define relationships
 User.hasMany(Transaction, { foreignKey: 'userId', as: 'transactions' });
@@ -31,10 +34,37 @@ Category.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Category.hasMany(Category, { foreignKey: 'parentCategoryId', as: 'subCategories' });
 Category.belongsTo(Category, { foreignKey: 'parentCategoryId', as: 'parentCategory' });
 
+// Budget relationships
+User.hasMany(Budget, { foreignKey: 'userId', as: 'budgets' });
+Budget.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+Category.hasMany(Budget, { foreignKey: 'categoryId', as: 'budgets' });
+Budget.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
+
+// Goal relationships
+User.hasMany(Goal, { foreignKey: 'userId', as: 'goals' });
+Goal.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+Category.hasMany(Goal, { foreignKey: 'categoryId', as: 'goals' });
+Goal.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
+
+// Goal Contribution relationships
+User.hasMany(GoalContribution, { foreignKey: 'userId', as: 'goalContributions' });
+GoalContribution.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+Goal.hasMany(GoalContribution, { foreignKey: 'goalId', as: 'contributions' });
+GoalContribution.belongsTo(Goal, { foreignKey: 'goalId', as: 'goal' });
+
+Transaction.hasMany(GoalContribution, { foreignKey: 'transactionId', as: 'goalContributions' });
+GoalContribution.belongsTo(Transaction, { foreignKey: 'transactionId', as: 'transaction' });
+
 // Export models and sequelize instance
 module.exports = {
   sequelize,
   User,
   Transaction,
-  Category
+  Category,
+  Budget,
+  Goal,
+  GoalContribution
 };
