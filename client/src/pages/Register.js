@@ -35,9 +35,10 @@ const Register = () => {
     
     // Clean up error state when component unmounts
     return () => {
-      dispatch(clearError());
+      dispatch(clearError());      
     };
   }, [isAuthenticated, navigate, dispatch]);
+
 
   const onFinish = (values) => {
     dispatch(registerUser({

@@ -26,6 +26,7 @@ const Login = () => {
   }, [isAuthenticated, navigate, dispatch]);
 
   const onFinish = (values) => {
+    console.log('Login values:', values);
     dispatch(loginUser(values));
   };
 

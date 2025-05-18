@@ -1,17 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-// Helper function to set auth header
-const setAuthToken = (token) => {
-  if (token) {
-    return {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    };
-  }
-  return {};
-};
+import axios from '../../utils/axios';
 
 // Initial state
 const initialState = {
@@ -28,8 +16,6 @@ const initialState = {
 export const fetchTransactions = createAsyncThunk(
   'transactions/fetchTransactions',
   async ({ page = 1, limit = 20, filters = {} }, { rejectWithValue }) => {
-    const token = localStorage.getItem('token');
-    
     try {
       let url = `/api/transactions?page=${page}&limit=${limit}`;
       
@@ -42,7 +28,7 @@ export const fetchTransactions = createAsyncThunk(
         url += `&category=${filters.category}`;
       }
       
-      const response = await axios.get(url, setAuthToken(token));
+      const response = await axios.get(url);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -56,10 +42,8 @@ export const fetchTransactions = createAsyncThunk(
 export const fetchTransaction = createAsyncThunk(
   'transactions/fetchTransaction',
   async (id, { rejectWithValue }) => {
-    const token = localStorage.getItem('token');
-    
     try {
-      const response = await axios.get(`/api/transactions/${id}`, setAuthToken(token));
+      const response = await axios.get(`/api/transactions/${id}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -73,10 +57,8 @@ export const fetchTransaction = createAsyncThunk(
 export const createTransaction = createAsyncThunk(
   'transactions/createTransaction',
   async (transactionData, { rejectWithValue }) => {
-    const token = localStorage.getItem('token');
-    
     try {
-      const response = await axios.post('/api/transactions', transactionData, setAuthToken(token));
+      const response = await axios.post('/api/transactions', transactionData);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -90,10 +72,8 @@ export const createTransaction = createAsyncThunk(
 export const updateTransaction = createAsyncThunk(
   'transactions/updateTransaction',
   async ({ id, transactionData }, { rejectWithValue }) => {
-    const token = localStorage.getItem('token');
-    
     try {
-      const response = await axios.put(`/api/transactions/${id}`, transactionData, setAuthToken(token));
+      const response = await axios.put(`/api/transactions/${id}`, transactionData);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -107,10 +87,8 @@ export const updateTransaction = createAsyncThunk(
 export const deleteTransaction = createAsyncThunk(
   'transactions/deleteTransaction',
   async (id, { rejectWithValue }) => {
-    const token = localStorage.getItem('token');
-    
     try {
-      await axios.delete(`/api/transactions/${id}`, setAuthToken(token));
+      await axios.delete(`/api/transactions/${id}`);
       return id;
     } catch (error) {
       return rejectWithValue(
@@ -124,13 +102,9 @@ export const deleteTransaction = createAsyncThunk(
 export const importTransactions = createAsyncThunk(
   'transactions/importTransactions',
   async (formData, { rejectWithValue }) => {
-    const token = localStorage.getItem('token');
-    
     try {
       const response = await axios.post('/api/transactions/import', formData, {
-        ...setAuthToken(token),
         headers: {
-          ...setAuthToken(token).headers,
           'Content-Type': 'multipart/form-data'
         }
       });
