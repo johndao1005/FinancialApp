@@ -32,6 +32,14 @@ Transaction.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Category.hasMany(Transaction, { foreignKey: 'categoryId', as: 'transactions' });
 Transaction.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
 
+// User-created categories
+User.hasMany(Category, { foreignKey: 'userId', as: 'categories' });
+Category.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+// Self-reference for subcategories
+Category.hasMany(Category, { foreignKey: 'parentCategoryId', as: 'subCategories' });
+Category.belongsTo(Category, { foreignKey: 'parentCategoryId', as: 'parentCategory' });
+
 // Export models and sequelize instance
 module.exports = {
   sequelize,

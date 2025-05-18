@@ -28,6 +28,14 @@ module.exports = (sequelize, DataTypes) => {
         model: 'categories',
         key: 'id'
       }
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'users',
+        key: 'id'
+      }
     }
   }, {
     timestamps: true
