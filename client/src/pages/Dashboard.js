@@ -1,10 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTransactions } from '../redux/slices/transactionSlice';
 import { 
-  PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, 
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar
+  Card, 
+  Row, 
+  Col, 
+  Typography, 
+  Statistic, 
+  Spin, 
+  Divider 
+} from 'antd';
+import { 
+  ArrowUpOutlined, 
+  ArrowDownOutlined, 
+  DollarOutlined 
+} from '@ant-design/icons';
+import { 
+  PieChart, 
+  Pie, 
+  Cell, 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar 
 } from 'recharts';
+import { fetchTransactions } from '../redux/slices/transactionSlice';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
