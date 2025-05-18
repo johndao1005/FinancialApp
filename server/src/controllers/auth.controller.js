@@ -80,3 +80,16 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.logout = async (req, res) => {
+  try {
+    // In a real-world scenario with sessions or token blacklists,
+    // you would invalidate the token or session here.
+    // For JWT, client-side logout is typically sufficient by removing the token.
+    
+    res.status(200).json({ message: 'Logout successful' });
+  } catch (error) {
+    console.error('Error in logout:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
