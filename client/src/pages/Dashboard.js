@@ -31,6 +31,8 @@ import {
 } from 'recharts';
 import { fetchTransactions } from '../redux/slices/transactionSlice';
 
+const { Title } = Typography;
+
 const Dashboard = () => {
   const dispatch = useDispatch();
   const { transactions, loading } = useSelector(state => state.transactions);
@@ -39,7 +41,7 @@ const Dashboard = () => {
   const [topMerchants, setTopMerchants] = useState([]);
 
   // Colors for charts
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a4de6c', '#d0ed57', '#8884d8'];
+  const COLORS = ['#1677ff', '#52c41a', '#faad14', '#f5222d', '#722ed1', '#13c2c2', '#fa8c16'];
 
   useEffect(() => {
     // Fetch transactions on component mount
@@ -163,45 +165,71 @@ const Dashboard = () => {
   const { income, expenses, balance } = calculateSummary();
 
   if (loading) {
-    return <div className="loading">Loading dashboard data...</div>;
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '70vh' 
+      }}>
+        <Spin size="large" tip="Loading dashboard data..." />
+      </div>
+    );
   }
 
   return (
-    <div className="dashboard">
-      <h1>Financial Dashboard</h1>
+    <div style={{ padding: '24px' }}>
+      <Typography.Title level={2}>Financial Dashboard</Typography.Title>
       
       {/* Summary Cards */}
-      <div className="row">
-        <div className="col">
-          <div className="card">
-            <h3>Total Income</h3>
-            <div className="amount positive">${income.toFixed(2)}</div>
-          </div>
-        </div>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={8}>
+          <Card>
+            <Statistic
+              title="Total Income"
+              value={income}
+              precision={2}
+              valueStyle={{ color: '#52c41a' }}
+              prefix={<ArrowUpOutlined />}
+              suffix="$"
+            />
+          </Card>
+        </Col>
         
-        <div className="col">
-          <div className="card">
-            <h3>Total Expenses</h3>
-            <div className="amount negative">${expenses.toFixed(2)}</div>
-          </div>
-        </div>
+        <Col xs={24} sm={8}>
+          <Card>
+            <Statistic
+              title="Total Expenses"
+              value={expenses}
+              precision={2}
+              valueStyle={{ color: '#f5222d' }}
+              prefix={<ArrowDownOutlined />}
+              suffix="$"
+            />
+          </Card>
+        </Col>
         
-        <div className="col">
-          <div className="card">
-            <h3>Balance</h3>
-            <div className={`amount ${balance >= 0 ? 'positive' : 'negative'}`}>
-              ${balance.toFixed(2)}
-            </div>
-          </div>
-        </div>
-      </div>
+        <Col xs={24} sm={8}>
+          <Card>
+            <Statistic
+              title="Balance"
+              value={balance}
+              precision={2}
+              valueStyle={{ color: balance >= 0 ? '#52c41a' : '#f5222d' }}
+              prefix={<DollarOutlined />}
+              suffix="$"
+            />
+          </Card>
+        </Col>
+      </Row>
+      
+      <Divider />
       
       {/* Charts */}
-      <div className="row">
+      <Row gutter={[16, 16]}>
         {/* Monthly Income vs Expenses */}
-        <div className="col">
-          <div className="card">
-            <h3>Monthly Overview</h3>
+        <Col xs={24} lg={12}>
+          <Card title="Monthly Overview">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -209,17 +237,16 @@ const Dashboard = () => {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="income" stroke="#2ecc71" name="Income" />
-                <Line type="monotone" dataKey="expenses" stroke="#e74c3c" name="Expenses" />
+                <Line type="monotone" dataKey="income" stroke="#52c41a" name="Income" />
+                <Line type="monotone" dataKey="expenses" stroke="#f5222d" name="Expenses" />
               </LineChart>
             </ResponsiveContainer>
-          </div>
-        </div>
+          </Card>
+        </Col>
         
         {/* Spending by Category */}
-        <div className="col">
-          <div className="card">
-            <h3>Spending by Category</h3>
+        <Col xs={24} lg={12}>
+          <Card title="Spending by Category">
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -239,27 +266,28 @@ const Dashboard = () => {
                 <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
               </PieChart>
             </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
+          </Card>
+        </Col>
+      </Row>
+      
+      <Divider />
       
       {/* Top Merchants */}
-      <div className="row">
-        <div className="col">
-          <div className="card">
-            <h3>Top Merchants</h3>
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Card title="Top Merchants">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={topMerchants}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                <Bar dataKey="amount" fill="#3498db" />
+                <Bar dataKey="amount" fill="#1677ff" />
               </BarChart>
             </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 };

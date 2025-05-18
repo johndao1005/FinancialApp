@@ -1,11 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
+  Table, 
+  Card, 
+  Typography, 
+  Button, 
+  Space, 
+  Form, 
+  DatePicker, 
+  Select, 
+  Input, 
+  Modal, 
+  Tag, 
+  Popconfirm,
+  Divider,
+  Row,
+  Col
+} from 'antd';
+import {
+  SearchOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  FilterOutlined,
+  ReloadOutlined
+} from '@ant-design/icons';
+import moment from 'moment';
+import { 
   fetchTransactions, 
   deleteTransaction,
   updateTransaction 
 } from '../redux/slices/transactionSlice';
 import { fetchCategories } from '../redux/slices/categorySlice';
+
+const { Title } = Typography;
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 const Transactions = () => {
   const dispatch = useDispatch();
@@ -14,6 +43,7 @@ const Transactions = () => {
   
   // Pagination and filtering state
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
@@ -23,6 +53,7 @@ const Transactions = () => {
   // For editing transactions
   const [editMode, setEditMode] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
+  const [form] = Form.useForm();
   
   useEffect(() => {
     // Fetch transactions and categories on component mount
@@ -31,19 +62,32 @@ const Transactions = () => {
   }, [dispatch, page]);
 
   // Apply filters
-  const handleFilterChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const applyFilters = () => {
+  const handleFilterChange = (values) => {
+    const newFilters = {
+      ...filters
+    };
+    
+    if (values.dateRange) {
+      newFilters.startDate = values.dateRange[0].format('YYYY-MM-DD');
+      newFilters.endDate = values.dateRange[1].format('YYYY-MM-DD');
+    } else {
+      newFilters.startDate = '';
+      newFilters.endDate = '';
+    }
+    
+    if (values.category) {
+      newFilters.category = values.category;
+    } else {
+      newFilters.category = '';
+    }
+    
+    setFilters(newFilters);
     setPage(1); // Reset to first page
-    dispatch(fetchTransactions({ page: 1, filters }));
+    dispatch(fetchTransactions({ page: 1, filters: newFilters }));
   };
 
   const resetFilters = () => {
+    form.resetFields();
     setFilters({
       startDate: '',
       endDate: '',
@@ -53,19 +97,9 @@ const Transactions = () => {
     dispatch(fetchTransactions({ page: 1, filters: {} }));
   };
 
-  // Pagination controls
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-      dispatch(fetchTransactions({ page: newPage, filters }));
-    }
-  };
-
   // Delete transaction
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this transaction?')) {
-      dispatch(deleteTransaction(id));
-    }
+    dispatch(deleteTransaction(id));
   };
 
   // Edit transaction
@@ -77,16 +111,14 @@ const Transactions = () => {
     setEditMode(true);
   };
 
-  const handleEditChange = (e) => {
+  const handleEditChange = (changedValues, allValues) => {
     setEditingTransaction({
       ...editingTransaction,
-      [e.target.name]: e.target.value
+      ...allValues
     });
   };
 
-  const handleEditSubmit = (e) => {
-    e.preventDefault();
-    
+  const handleEditSubmit = () => {
     dispatch(updateTransaction({
       id: editingTransaction.id,
       transactionData: editingTransaction
@@ -97,241 +129,220 @@ const Transactions = () => {
     });
   };
 
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+  const handlePageChange = (newPage, newPageSize) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
+    dispatch(fetchTransactions({ 
+      page: newPage, 
+      pageSize: newPageSize, 
+      filters 
+    }));
   };
 
+  // Table columns
+  const columns = [
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      render: text => moment(text).format('MMM DD, YYYY'),
+      sorter: (a, b) => new Date(a.date) - new Date(b.date)
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
+      ellipsis: true
+    },
+    {
+      title: 'Category',
+      dataIndex: 'category',
+      key: 'category',
+      render: category => (
+        <Tag color="blue">{category.name}</Tag>
+      )
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: amount => (
+        <span style={{ 
+          color: amount < 0 ? '#f5222d' : '#52c41a',
+          fontWeight: 'bold'
+        }}>
+          ${Math.abs(amount).toFixed(2)}
+        </span>
+      ),
+      sorter: (a, b) => a.amount - b.amount
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, record) => (
+        <Space size="small">
+          <Button
+            type="text"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          />
+          <Popconfirm
+            title="Are you sure you want to delete this transaction?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button
+              type="text"
+              danger
+              icon={<DeleteOutlined />}
+            />
+          </Popconfirm>
+        </Space>
+      )
+    }
+  ];
+
   return (
-    <div className="transactions-page">
-      <h1>Transactions</h1>
+    <div style={{ padding: '24px' }}>
+      <Title level={2}>Transactions</Title>
       
-      {/* Filters */}
-      <div className="card">
-        <div className="card-header">
-          <h3>Filters</h3>
-        </div>
-        <div className="row">
-          <div className="col">
-            <div className="form-group">
-              <label className="form-label">Start Date</label>
-              <input
-                type="date"
-                name="startDate"
-                value={filters.startDate}
-                onChange={handleFilterChange}
-                className="form-control"
-              />
-            </div>
-          </div>
-          
-          <div className="col">
-            <div className="form-group">
-              <label className="form-label">End Date</label>
-              <input
-                type="date"
-                name="endDate"
-                value={filters.endDate}
-                onChange={handleFilterChange}
-                className="form-control"
-              />
-            </div>
-          </div>
-          
-          <div className="col">
-            <div className="form-group">
-              <label className="form-label">Category</label>
-              <select
-                name="category"
-                value={filters.category}
-                onChange={handleFilterChange}
-                className="form-control"
+      <Card title="Filters" extra={
+        <Button 
+          icon={<ReloadOutlined />} 
+          onClick={resetFilters}
+        >
+          Reset
+        </Button>
+      }>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFilterChange}
+        >
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item 
+                name="dateRange" 
+                label="Date Range"
               >
-                <option value="">All Categories</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-        
-        <div className="filter-buttons">
-          <button onClick={applyFilters} className="btn">
-            Apply Filters
-          </button>
-          <button onClick={resetFilters} className="btn btn-secondary">
-            Reset
-          </button>
-        </div>
-      </div>
-      
-      {/* Edit Modal */}
-      {editMode && (
-        <div className="edit-modal">
-          <div className="edit-modal-content card">
-            <h3>Edit Transaction</h3>
-            <form onSubmit={handleEditSubmit}>
-              <div className="form-group">
-                <label className="form-label">Date</label>
-                <input
-                  type="date"
-                  name="date"
-                  value={editingTransaction.date}
-                  onChange={handleEditChange}
-                  className="form-control"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Description</label>
-                <input
-                  type="text"
-                  name="description"
-                  value={editingTransaction.description}
-                  onChange={handleEditChange}
-                  className="form-control"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Amount</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  name="amount"
-                  value={editingTransaction.amount}
-                  onChange={handleEditChange}
-                  className="form-control"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Category</label>
-                <select
-                  name="categoryId"
-                  value={editingTransaction.categoryId || ''}
-                  onChange={handleEditChange}
-                  className="form-control"
+                <RangePicker style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            
+            <Col span={8}>
+              <Form.Item 
+                name="category" 
+                label="Category"
+              >
+                <Select
+                  placeholder="Select Category"
+                  allowClear
+                  style={{ width: '100%' }}
                 >
-                  <option value="">Select Category</option>
                   {categories.map(category => (
-                    <option key={category.id} value={category.id}>
+                    <Option key={category.id} value={category.id}>
                       {category.name}
-                    </option>
+                    </Option>
                   ))}
-                </select>
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Type</label>
-                <select
-                  name="isExpense"
-                  value={editingTransaction.isExpense}
-                  onChange={handleEditChange}
-                  className="form-control"
+                </Select>
+              </Form.Item>
+            </Col>
+            
+            <Col span={8}>
+              <Form.Item label=" " colon={false}>
+                <Button 
+                  type="primary" 
+                  htmlType="submit" 
+                  icon={<FilterOutlined />}
+                  block
                 >
-                  <option value={true}>Expense</option>
-                  <option value={false}>Income</option>
-                </select>
-              </div>
-              
-              <div className="edit-modal-buttons">
-                <button type="submit" className="btn">
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    setEditMode(false);
-                    setEditingTransaction(null);
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+                  Apply Filters
+                </Button>
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </Card>
       
-      {/* Transactions Table */}
-      <div className="card">
-        <div className="transactions-table">
-          {loading ? (
-            <div className="loading">Loading transactions...</div>
-          ) : transactions.length === 0 ? (
-            <div className="no-data">No transactions found</div>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Category</th>
-                  <th>Amount</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map(transaction => (
-                  <tr key={transaction.id}>
-                    <td>{formatDate(transaction.date)}</td>
-                    <td>{transaction.description}</td>
-                    <td>
-                      {transaction.category ? transaction.category.name : 'Uncategorized'}
-                    </td>
-                    <td className={transaction.isExpense ? 'negative' : 'positive'}>
-                      {transaction.isExpense ? '-' : '+'}
-                      ${parseFloat(transaction.amount).toFixed(2)}
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => handleEdit(transaction)}
-                        className="btn btn-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(transaction.id)}
-                        className="btn btn-sm btn-danger"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
+      <Divider />
+      
+      <Card>
+        <Table
+          columns={columns}
+          dataSource={transactions.map(tx => ({ ...tx, key: tx.id }))}
+          pagination={{
+            current: page,
+            pageSize: pageSize,
+            total: totalPages * pageSize, // Approximate if you don't have exact count
+            onChange: handlePageChange,
+            showSizeChanger: true
+          }}
+          loading={loading}
+          scroll={{ x: 'max-content' }}
+        />
+      </Card>
+      
+      {/* Edit Transaction Modal */}
+      <Modal
+        title="Edit Transaction"
+        visible={editMode}
+        onOk={handleEditSubmit}
+        onCancel={() => setEditMode(false)}
+        okText="Save"
+        confirmLoading={loading}
+      >
+        {editingTransaction && (
+          <Form
+            initialValues={{
+              date: moment(editingTransaction.date),
+              description: editingTransaction.description,
+              amount: editingTransaction.amount,
+              categoryId: editingTransaction.category.id
+            }}
+            onValuesChange={handleEditChange}
+            layout="vertical"
+          >
+            <Form.Item
+              name="date"
+              label="Date"
+              rules={[{ required: true, message: 'Please select date!' }]}
+            >
+              <DatePicker style={{ width: '100%' }} />
+            </Form.Item>
+            
+            <Form.Item
+              name="description"
+              label="Description"
+              rules={[{ required: true, message: 'Please enter description!' }]}
+            >
+              <Input />
+            </Form.Item>
+            
+            <Form.Item
+              name="amount"
+              label="Amount"
+              rules={[{ required: true, message: 'Please enter amount!' }]}
+            >
+              <Input type="number" step="0.01" />
+            </Form.Item>
+            
+            <Form.Item
+              name="categoryId"
+              label="Category"
+              rules={[{ required: true, message: 'Please select category!' }]}
+            >
+              <Select>
+                {categories.map(category => (
+                  <Option key={category.id} value={category.id}>
+                    {category.name}
+                  </Option>
                 ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-        
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="pagination">
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              className="btn btn-sm"
-            >
-              Previous
-            </button>
-            <span>
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-              className="btn btn-sm"
-            >
-              Next
-            </button>
-          </div>
+              </Select>
+            </Form.Item>
+          </Form>
         )}
-      </div>
+      </Modal>
     </div>
   );
 };
