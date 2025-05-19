@@ -6,8 +6,8 @@ import {
   updateBudget, 
   deleteBudget,
   fetchBudgetProgress
-} from '../redux/slices/budgetSlice';
-import { fetchCategories } from '../redux/slices/categorySlice';
+} from '../../redux/slices/budgetSlice';
+import { fetchCategories } from '../../redux/slices/categorySlice';
 import { 
   Table, 
   Button, 

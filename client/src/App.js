@@ -22,7 +22,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import UploadStatement from './pages/UploadStatement';
 import Profile from './pages/Profile';
-import Budgets from './pages/Budgets';
+import Budgets from './pages/Budgets/Budgets';
 import Goals from './pages/Goals';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
