@@ -1,7 +1,27 @@
+/**
+ * Category Controller
+ * 
+ * Manages the API endpoints for transaction categories in the application.
+ * Handles CRUD operations for both system default categories and user-defined
+ * custom categories. Ensures proper access control so users can only access
+ * default categories and their own custom categories.
+ * 
+ * Key features:
+ * - Retrieval of available categories (both default and user-created)
+ * - Creation of custom user categories
+ * - Category update and deletion (with constraints)
+ * - Category usage statistics
+ */
 const { Category } = require('../models');
 const { Op } = require('sequelize');
 
-// Get all categories
+/**
+ * Get all categories available to the user
+ * 
+ * @route GET /api/categories
+ * @access Private - Requires authentication
+ * @returns {Array} List of system default categories and user's custom categories
+ */
 exports.getCategories = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -10,11 +30,11 @@ exports.getCategories = async (req, res) => {
     const categories = await Category.findAll({
       where: {
         [Op.or]: [
-          { isDefault: true },
-          { userId }
+          { isDefault: true },     // System default categories available to all users
+          { userId }               // User's custom categories
         ]
       },
-      order: [['name', 'ASC']]
+      order: [['name', 'ASC']]     // Alphabetical ordering
     });
     
     res.json(categories);
@@ -24,7 +44,14 @@ exports.getCategories = async (req, res) => {
   }
 };
 
-// Get a single category
+/**
+ * Get a single category by ID
+ * 
+ * @route GET /api/categories/:id
+ * @access Private - Requires authentication
+ * @param {string} req.params.id - Category ID to retrieve
+ * @returns {Object} Category details
+ */
 exports.getCategory = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -32,8 +59,8 @@ exports.getCategory = async (req, res) => {
       where: {
         id: req.params.id,
         [Op.or]: [
-          { isDefault: true },
-          { userId }
+          { isDefault: true },    // Either a system default category
+          { userId }              // Or a category created by this user
         ]
       }
     });

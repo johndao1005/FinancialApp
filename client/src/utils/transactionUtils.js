@@ -9,11 +9,14 @@ import moment from 'moment';
  * Quick add a new transaction
  * @param {Object} transactionData - Transaction data object
  * @param {number|string} transactionData.amount - Transaction amount (negative for expenses, positive for income)
- * @param {string} transactionData.description - Transaction description
+ * @param {string} [transactionData.description] - Transaction description (optional)
  * @param {string|Object} transactionData.date - Transaction date (string in YYYY-MM-DD format or moment object)
- * @param {string} transactionData.categoryId - Category ID
+ * @param {string} [transactionData.categoryId] - Category ID (optional)
  * @param {string} [transactionData.merchant] - Merchant name (optional)
  * @param {string} [transactionData.notes] - Additional notes (optional)
+ * @param {boolean} [transactionData.isRecurring] - Whether this is a recurring transaction (optional)
+ * @param {string} [transactionData.recurringFrequency] - Frequency of recurring payment (daily, weekly, biweekly, monthly, quarterly, annually) (optional)
+ * @param {string|Object} [transactionData.recurringEndDate] - End date for recurring payments (string in YYYY-MM-DD format or moment object) (optional)
  * @returns {Promise} - Promise that resolves when transaction is added
  * 
  * @example
@@ -31,22 +34,38 @@ import moment from 'moment';
  *   .then(() => console.log('Transaction added successfully'))
  *   .catch(error => console.error('Failed to add transaction:', error));
  * 
- * // Add income
+ * // Add recurring payment
  * quickAddTransaction({
- *   amount: 1000,
- *   description: 'Salary',
+ *   amount: -9.99,
+ *   description: 'Monthly subscription',
  *   date: moment(),
- *   categoryId: 'income-category-id',
+ *   categoryId: 'entertainment-category-id',
+ *   isRecurring: true,
+ *   recurringFrequency: 'monthly', 
+ *   recurringEndDate: moment().add(1, 'year')
  * });
  */
 export const quickAddTransaction = async (transactionData) => {
-  // Format the date if it's a moment object
+  // Format the dates if they're moment objects
   const formattedData = {
     ...transactionData,
     date: transactionData.date instanceof moment 
       ? transactionData.date.format('YYYY-MM-DD') 
       : transactionData.date
   };
+  
+  // Format recurring end date if it exists
+  if (formattedData.isRecurring && formattedData.recurringEndDate) {
+    formattedData.recurringEndDate = formattedData.recurringEndDate instanceof moment
+      ? formattedData.recurringEndDate.format('YYYY-MM-DD')
+      : formattedData.recurringEndDate;
+  }
+  
+  // Make sure recurring fields are only included when isRecurring is true
+  if (!formattedData.isRecurring) {
+    delete formattedData.recurringFrequency;
+    delete formattedData.recurringEndDate;
+  }
   
   // Use the Redux store directly
   return store.dispatch(createTransaction(formattedData)).unwrap();

@@ -1,3 +1,12 @@
+/**
+ * Transaction Controller
+ * 
+ * This controller handles all transaction-related API operations:
+ * - Fetching transactions with filtering and pagination
+ * - Creating, updating, and deleting transactions
+ * - Importing transactions from CSV files
+ * - Managing recurring transactions
+ */
 const { Transaction, Category } = require('../models');
 const { Op } = require('sequelize');
 const multer = require('multer');
@@ -5,7 +14,15 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-// Configure multer for file uploads
+/**
+ * Configure file upload for transaction import
+ * 
+ * Sets up multer storage for CSV file uploads:
+ * - Creates upload directory if it doesn't exist
+ * - Sets unique filename with timestamp
+ * - Limits file size to 10MB
+ * - Restricts to CSV files only
+ */
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(__dirname, '../uploads');
@@ -30,7 +47,18 @@ const upload = multer({
   }
 }).single('file');
 
-// Get all transactions for the authenticated user
+/**
+ * Get all transactions for the authenticated user
+ * 
+ * Fetches transactions with pagination and optional filtering:
+ * - Date range filtering (startDate to endDate)
+ * - Category filtering
+ * - Includes category information
+ * - Sorts by date descending (newest first)
+ * 
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 exports.getTransactions = async (req, res) => {
   try {
     const userId = req.user.id;

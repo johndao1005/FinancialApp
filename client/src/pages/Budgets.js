@@ -8,7 +8,6 @@ import {
   fetchBudgetProgress
 } from '../redux/slices/budgetSlice';
 import { fetchCategories } from '../redux/slices/categorySlice';
-import { fetchTransactions } from '../redux/slices/transactionSlice';
 import { 
   Table, 
   Button, 
@@ -26,19 +25,16 @@ import {
   Popconfirm,
   Typography,
   Divider,
-  message,
-  Space
+  message
 } from 'antd';
 import { 
   PlusOutlined, 
   EditOutlined, 
   DeleteOutlined,
   DollarOutlined,
-  CalendarOutlined,
-  FileAddOutlined
+  CalendarOutlined
 } from '@ant-design/icons';
 import moment from 'moment';
-import QuickTransactionEntry from '../components/QuickTransactionEntry';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -223,22 +219,13 @@ const Budgets = () => {
     <div style={{ padding: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <Title level={2}>Budgets</Title>
-        <Space>
-          <QuickTransactionEntry 
-            initialType="expense"
-            onSuccess={() => {
-              dispatch(fetchBudgets());
-              message.success('Transaction added successfully');
-            }}
-          />
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
-            onClick={() => showModal()}
-          >
-            Create Budget
-          </Button>
-        </Space>
+        <Button 
+          type="primary" 
+          icon={<PlusOutlined />} 
+          onClick={() => showModal()}
+        >
+          Create Budget
+        </Button>
       </div>
       
       <Table 
@@ -410,18 +397,7 @@ const Budgets = () => {
                 />
               </div>
               
-              <Divider>
-                <Space>
-                  <span>Recent Transactions</span>
-                  <QuickTransactionEntry 
-                    initialType="expense"
-                    onSuccess={() => {
-                      dispatch(fetchBudgetProgress(budgetProgress.budget.id));
-                      dispatch(fetchBudgets());
-                    }}
-                  />
-                </Space>
-              </Divider>
+              <Divider>Recent Transactions</Divider>
               
               <Table 
                 dataSource={budgetProgress.transactions.slice(0, 5)}

@@ -1,3 +1,12 @@
+/**
+ * Navbar Component
+ * 
+ * Provides the main navigation interface for the application:
+ * 1. Collapsible sidebar with links to main sections
+ * 2. Responsive design that adapts to mobile and desktop
+ * 3. User profile dropdown with logout functionality
+ * 4. Visual indication of the current active page
+ */
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,9 +31,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector(state => state.auth);
-  const [collapsed, setCollapsed] = useState(false);
+  
+  // UI state
+  const [collapsed, setCollapsed] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+  /**
+   * Handle window resize events to adjust for mobile/desktop layouts
+   */
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -34,6 +48,10 @@ const Navbar = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  /**
+   * Handle user logout
+   * Dispatches logout action and redirects to login page
+   */
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');

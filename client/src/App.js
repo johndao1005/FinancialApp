@@ -1,3 +1,17 @@
+/**
+ * Main App Component
+ * 
+ * This is the root component of the Financial App that sets up:
+ * 1. Routing with React Router for different pages
+ * 2. Layout structure using Ant Design
+ * 3. Authentication-based conditional rendering
+ * 4. Theme configuration
+ * 
+ * The app has two main states:
+ * - Authenticated: Shows navigation sidebar and private routes
+ * - Unauthenticated: Shows only login/register pages
+ */
+
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -17,6 +31,7 @@ import './styles/App.css';
 const { Content } = Layout;
 
 function App() {
+  // Get authentication state from Redux store
   const { isAuthenticated } = useSelector(state => state.auth);
 
   return (
@@ -30,12 +45,15 @@ function App() {
       }}
     >
       <Layout style={{ minHeight: '100vh' }}>
+        {/* Conditional rendering based on authentication status */}
         {isAuthenticated ? (
           <>
+            {/* Authenticated Layout with Navigation */}
             <Navbar />
             <Layout className="site-layout">
-              <Content style={{ margin: '24px 16px', padding: 24, minHeight: 280, overflow: 'initial' }}>
+              <Content style={{ margin: '24px 16px', padding: 24, minHeight: 280, overflow: 'initial' ,paddingLeft:100}}>
                 <Routes>
+                  {/* Protected Routes - Only accessible when logged in */}
                   <Route element={<PrivateRoute />}>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/transactions" element={<Transactions />} />
@@ -44,13 +62,14 @@ function App() {
                     <Route path="/budgets" element={<Budgets />} />
                     <Route path="/goals" element={<Goals />} />
                   </Route>
-                  <Route path="*" element={<Navigate to="/" />} />
+        N          <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </Content>
             </Layout>
           </>
         ) : (
-          <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+          <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '24px' }}>
+            {/* Unauthenticated Layout - Login/Register pages */}
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />

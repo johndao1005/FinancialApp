@@ -1,3 +1,13 @@
+/**
+ * PrivateRoute Component
+ * 
+ * Protects routes that require authentication:
+ * 1. Shows loading indicator while authentication status is being checked
+ * 2. Redirects unauthenticated users to the login page
+ * 3. Renders child routes if the user is authenticated
+ * 
+ * Used in App.js to wrap all routes that require login
+ */
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';

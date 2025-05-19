@@ -1,274 +1,264 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Form, Input, Button, DatePicker, Select, message, Modal, Radio } from 'antd';
-import { PlusOutlined, MinusOutlined, DollarOutlined, SaveOutlined } from '@ant-design/icons';
+/**
+ * QuickTransactionEntry Component
+ * 
+ * This component provides a quick way to add new transactions from the dashboard.
+ * Features:
+ * - Modal popup with a form for transaction details
+ * - Support for both expense and income transactions
+ * - Support for recurring transactions (one-off, weekly, bi-weekly, monthly)
+ * - Optional end date for recurring transactions
+ * - Different category options based on transaction type (expense/income)
+ * 
+ * Props:
+ * - onSuccess: Callback function to execute after successfully adding a transaction
+ */
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { 
+  Button, 
+  Modal, 
+  Form, 
+  Input, 
+  DatePicker, 
+  Select, 
+  InputNumber, 
+  Switch,
+  message,
+  Radio
+} from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { createTransaction } from '../redux/slices/transactionSlice';
 import moment from 'moment';
-import { fetchCategories } from '../redux/slices/categorySlice';
-import { quickAddTransaction, quickAddExpense, quickAddIncome } from '../utils/transactionUtils';
 
 const { Option } = Select;
 
-/**
- * Quick Transaction Entry Component
- * 
- * This component provides a simple form for quickly adding transactions.
- * Can be used anywhere in the application.
- * 
- * @param {Object} props
- * @param {Function} props.onSuccess - Callback function when transaction is added successfully
- * @param {string} props.initialType - Initial transaction type ('expense' or 'income')
- * @param {boolean} props.inModal - Whether to render as a button that opens a modal (true) or inline form (false)
- */
-const QuickTransactionEntry = ({ onSuccess, initialType = 'expense', inModal = true }) => {
-  const dispatch = useDispatch();
-  const { categories } = useSelector(state => state.categories);
-  const [visible, setVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
+const QuickTransactionEntry = ({ onSuccess }) => {
   const [form] = Form.useForm();
-  const [transactionType, setTransactionType] = useState(initialType);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExpense, setIsExpense] = useState(true);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    // Fetch categories if not already loaded
-    if (categories.length === 0) {
-      dispatch(fetchCategories());
+  // Common expense categories
+  const expenseCategories = [
+    'Food & Dining', 
+    'Transportation', 
+    'Housing', 
+    'Utilities', 
+    'Entertainment', 
+    'Shopping', 
+    'Healthcare',
+    'Personal Care',
+    'Education',
+    'Travel',
+    'Other'
+  ];
+
+  // Common income categories
+  const incomeCategories = [
+    'Salary', 
+    'Freelance', 
+    'Investments', 
+    'Gifts', 
+    'Refunds',
+    'Other'
+  ];
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    form.resetFields();
+  };
+
+  /**
+   * Handle form submission to create a new transaction
+   * 
+   * This function:
+   * 1. Formats the transaction data from form values
+   * 2. Handles both one-time and recurring transactions
+   * 3. Includes end date for recurring transactions if provided
+   * 4. Dispatches the createTransaction action to the Redux store
+   * 5. Shows success or error messages
+   * 6. Calls the onSuccess callback if provided
+   * 
+   * @param {Object} values - Form values from Ant Design form
+   */
+  const handleSubmit = async (values) => {
+    setLoading(true);
+    
+    try {
+      const transactionData = {
+        ...values,
+        date: values.date.format('YYYY-MM-DD'),
+        isExpense,
+        amount: parseFloat(values.amount).toFixed(2),
+        isRecurring: values.recurringFrequency !== 'one-off',
+        recurringFrequency: values.recurringFrequency !== 'one-off' ? values.recurringFrequency : null
+      };
+      
+      // Add end date for recurring transactions if provided
+      if (values.recurringEndDate && values.recurringFrequency !== 'one-off') {
+        transactionData.recurringEndDate = values.recurringEndDate.format('YYYY-MM-DD');
+      }
+      
+      await dispatch(createTransaction(transactionData)).unwrap();
+      message.success('Transaction added successfully!');
+      setIsModalOpen(false);
+      form.resetFields();
+      
+      // Call the success callback if provided
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      message.error('Failed to add transaction: ' + (error || 'Unknown error'));
+    } finally {
+      setLoading(false);
     }
-  }, [dispatch, categories]);
-
-  const handleTypeChange = e => {
-    setTransactionType(e.target.value);
   };
-
-  const handleSubmit = () => {
-    form.validateFields()
-      .then(values => {
-        setLoading(true);
-        
-        const transactionData = {
-          description: values.description,
-          amount: transactionType === 'expense' ? -Math.abs(values.amount) : Math.abs(values.amount),
-          date: values.date.format('YYYY-MM-DD'),
-          categoryId: values.categoryId,
-          merchant: values.merchant || '',
-          notes: values.notes || '',
-          isRecurring: values.isRecurring || false
-        };
-        
-        // Add recurring payment details if applicable
-        if (transactionData.isRecurring) {
-          transactionData.recurringFrequency = values.recurringFrequency;
-          transactionData.recurringEndDate = values.recurringEndDate ? 
-            values.recurringEndDate.format('YYYY-MM-DD') : null;
-        }
-        
-        quickAddTransaction(transactionData)
-          .then(() => {
-            setLoading(false);
-            message.success('Transaction added successfully');
-            form.resetFields();
-            
-            if (inModal) {
-              setVisible(false);
-            }
-            
-            if (onSuccess) {
-              onSuccess(transactionData);
-            }
-          })
-          .catch(error => {
-            setLoading(false);
-            message.error('Failed to add transaction: ' + error);
-          });
-      })
-      .catch(info => {
-        console.log('Validate Failed:', info);
-      });
-  };
-
-  const openModal = () => {
-    form.setFieldsValue({
-      date: moment(),
-      amount: '',
-      description: '',
-      categoryId: undefined,
-      merchant: '',
-      notes: '',
-      isRecurring: false,
-      recurringFrequency: undefined,
-      recurringEndDate: undefined
-    });
-    setVisible(true);
-  };
-
-  const renderForm = () => (
-    <Form
-      form={form}
-      layout="vertical"
-      initialValues={{
-        date: moment(),
-        type: transactionType
-      }}
-    >
-      <Form.Item name="type" label="Transaction Type">
-        <Radio.Group onChange={handleTypeChange} value={transactionType}>
-          <Radio.Button value="expense">
-            <MinusOutlined /> Expense
-          </Radio.Button>
-          <Radio.Button value="income">
-            <PlusOutlined /> Income
-          </Radio.Button>
-        </Radio.Group>
-      </Form.Item>
-      
-      <Form.Item
-        name="date"
-        label="Date"
-        rules={[{ required: true, message: 'Date is required' }]}
-      >
-        <DatePicker style={{ width: '100%' }} />
-      </Form.Item>
-      
-      <Form.Item
-        name="description"
-        label="Description"
-      >
-        <Input placeholder="What is this transaction for?" />
-      </Form.Item>
-      
-      <Form.Item
-        name="amount"
-        label="Amount"
-        rules={[
-          { required: true, message: 'Amount is required' },
-          { 
-            validator: (_, value) => {
-              if (isNaN(value) || parseFloat(value) <= 0) {
-                return Promise.reject('Please enter a valid positive amount');
-              }
-              return Promise.resolve();
-            }
-          }
-        ]}
-      >
-        <Input 
-          type="number" 
-          step="0.01" 
-          min="0.01" 
-          prefix={<DollarOutlined />} 
-          placeholder="0.00" 
-        />
-      </Form.Item>
-      
-      <Form.Item
-        name="categoryId"
-        label="Category"
-      >
-        <Select placeholder="Select a category">
-          {categories.map(category => (
-            <Option key={category.id} value={category.id}>
-              {category.name}
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-      
-      <Form.Item
-        name="isRecurring"
-        label="Recurring Payment"
-        initialValue={false}
-      >
-        <Select>
-          <Option value={false}>No</Option>
-          <Option value={true}>Yes</Option>
-        </Select>
-      </Form.Item>
-      
-      <Form.Item
-        noStyle
-        shouldUpdate={(prevValues, currentValues) => prevValues.isRecurring !== currentValues.isRecurring}
-      >
-        {({ getFieldValue }) => 
-          getFieldValue('isRecurring') === true ? (
-            <>
-              <Form.Item
-                name="recurringFrequency"
-                label="Frequency"
-                rules={[{ required: getFieldValue('isRecurring'), message: 'Please select frequency!' }]}
-              >
-                <Select placeholder="Select frequency">
-                  <Option value="daily">Daily</Option>
-                  <Option value="weekly">Weekly</Option>
-                  <Option value="biweekly">Bi-weekly</Option>
-                  <Option value="monthly">Monthly</Option>
-                  <Option value="quarterly">Quarterly</Option>
-                  <Option value="annually">Annually</Option>
-                </Select>
-              </Form.Item>
-              
-              <Form.Item
-                name="recurringEndDate"
-                label="End Date"
-              >
-                <DatePicker style={{ width: '100%' }} />
-              </Form.Item>
-            </>
-          ) : null
-        }
-      </Form.Item>
-      
-      <Form.Item
-        name="merchant"
-        label="Merchant"
-      >
-        <Input placeholder="Where did you make this transaction? (optional)" />
-      </Form.Item>
-      
-      <Form.Item
-        name="notes"
-        label="Notes"
-      >
-        <Input.TextArea placeholder="Additional notes (optional)" rows={3} />
-      </Form.Item>
-    </Form>
-  );
-
-  if (inModal) {
-    return (
-      <>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />} 
-          onClick={openModal}
-        >
-          Quick Add Transaction
-        </Button>
-        
-        <Modal
-          title={`Add New ${transactionType === 'expense' ? 'Expense' : 'Income'}`}
-          visible={visible}
-          onOk={handleSubmit}
-          onCancel={() => setVisible(false)}
-          okText="Add"
-          confirmLoading={loading}
-          okButtonProps={{ icon: <SaveOutlined /> }}
-        >
-          {renderForm()}
-        </Modal>
-      </>
-    );
-  }
 
   return (
-    <div className="quick-transaction-form">
-      {renderForm()}
+    <>
+      {/* Quick Add Button to open the modal */}
       <Button 
         type="primary" 
-        onClick={handleSubmit} 
-        loading={loading}
-        icon={<SaveOutlined />}
+        icon={<PlusOutlined />}
+        onClick={showModal}
       >
-        Add {transactionType === 'expense' ? 'Expense' : 'Income'}
+        Quick Add
       </Button>
-    </div>
+      
+      {/* Transaction Entry Modal Form */}
+      <Modal
+        title="Add New Transaction"
+        open={isModalOpen}
+        onCancel={handleCancel}
+        footer={null}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{
+            date: moment(),
+            amount: '',
+            isExpense: true,
+            category: isExpense ? 'Food & Dining' : 'Salary',
+            description: '',
+            merchant: '',
+            recurringFrequency: 'one-off'
+          }}
+        >
+          {/* Transaction Type Switch (Expense/Income) */}
+          <Form.Item label="Transaction Type">
+            <Switch
+              checkedChildren="Expense"
+              unCheckedChildren="Income"
+              defaultChecked
+              onChange={(checked) => {
+                setIsExpense(checked);
+                form.setFieldsValue({
+                  category: checked ? 'Food & Dining' : 'Salary'
+                });
+              }}
+            />
+          </Form.Item>
+          
+          {/* Transaction Date */}
+          <Form.Item
+            name="date"
+            label="Date"
+            rules={[{ required: true, message: 'Please select a date!' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+          
+          {/* Transaction Amount */}
+          <Form.Item
+            name="amount"
+            label="Amount"
+            rules={[{ required: true, message: 'Please enter an amount!' }]}
+          >
+            <InputNumber 
+              style={{ width: '100%' }} 
+              prefix="$" 
+              min={0.01} 
+              step={0.01} 
+              precision={2}
+              placeholder="0.00"
+            />
+          </Form.Item>
+          
+          {/* Transaction Category */}
+          <Form.Item
+            name="category"
+            label="Category"
+            rules={[{ required: true, message: 'Please select a category!' }]}
+          >
+            <Select>
+              {(isExpense ? expenseCategories : incomeCategories).map(category => (
+                <Option key={category} value={category}>{category}</Option>
+              ))}
+            </Select>
+          </Form.Item>
+          
+          {/* Transaction Description */}
+          <Form.Item
+            name="description"
+            label="Description"
+          >
+            <Input placeholder="What is this transaction for?" />
+          </Form.Item>
+          
+          {/* Merchant Field (only shown for expenses) */}
+          {isExpense && (
+            <Form.Item
+              name="merchant"
+              label="Merchant"
+            >
+              <Input placeholder="Where did you make this purchase?" />
+            </Form.Item>
+          )}
+          
+          {/* Recurring Transaction Options */}
+          <Form.Item
+            name="recurringFrequency"
+            label="Repeat Transaction"
+            rules={[{ required: true, message: 'Please select a frequency!' }]}
+          >
+            <Radio.Group onChange={(e) => setIsRecurring(e.target.value !== 'one-off')}>
+              <Radio.Button value="one-off">One-off</Radio.Button>
+              <Radio.Button value="weekly">Weekly</Radio.Button>
+              <Radio.Button value="biweekly">Bi-weekly</Radio.Button>
+              <Radio.Button value="monthly">Monthly</Radio.Button>
+            </Radio.Group>
+          </Form.Item>
+          
+          {/* End Date for Recurring Transactions */}
+          {isRecurring && (
+            <Form.Item
+              name="recurringEndDate"
+              label="End Date (Optional)"
+              tooltip="Leave empty for indefinite recurring transactions"
+            >
+              <DatePicker style={{ width: '100%' }} />
+            </Form.Item>
+          )}
+          
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Button style={{ marginRight: 8 }} onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              Add Transaction
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
   );
 };
 

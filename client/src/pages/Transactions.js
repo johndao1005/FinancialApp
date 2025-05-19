@@ -1,3 +1,13 @@
+/**
+ * Transactions Component
+ * 
+ * Main page for managing financial transactions. This component provides:
+ * 1. A filterable and sortable table of all transactions
+ * 2. Date range and category filtering
+ * 3. Editing capabilities for existing transactions
+ * 4. Support for recurring transaction management
+ * 5. Pagination for handling large transaction histories
+ */
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
@@ -15,23 +25,20 @@ import {
   Popconfirm,
   Divider,
   Row,
-  Col,
-  message
+  Col
 } from 'antd';
 import {
   SearchOutlined,
   EditOutlined,
   DeleteOutlined,
   FilterOutlined,
-  ReloadOutlined,
-  PlusOutlined
+  ReloadOutlined
 } from '@ant-design/icons';
 import moment from 'moment';
 import { 
   fetchTransactions, 
   deleteTransaction,
-  updateTransaction,
-  createTransaction
+  updateTransaction 
 } from '../redux/slices/transactionSlice';
 import { fetchCategories } from '../redux/slices/categorySlice';
 
@@ -41,6 +48,7 @@ const { Option } = Select;
 
 const Transactions = () => {
   const dispatch = useDispatch();
+  // Redux state selectors
   const { transactions, loading, totalPages, currentPage } = useSelector(state => state.transactions);
   const { categories } = useSelector(state => state.categories);
   
@@ -56,18 +64,7 @@ const Transactions = () => {
   // For editing transactions
   const [editMode, setEditMode] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
-  
-  // For adding transactions
-  const [addMode, setAddMode] = useState(false);
-  const [newTransaction, setNewTransaction] = useState({
-    date: moment().format('YYYY-MM-DD'),
-    description: '',
-    amount: 0,
-    categoryId: ''
-  });
-  
   const [form] = Form.useForm();
-  const [addForm] = Form.useForm();
   
   useEffect(() => {
     // Fetch transactions and categories on component mount
@@ -75,7 +72,14 @@ const Transactions = () => {
     dispatch(fetchCategories());
   }, [dispatch, page]);
 
-  // Apply filters
+  /**
+   * Apply filter criteria to transaction list
+   * 
+   * Handles date range and category filters and refreshes transaction list
+   * with the new filter parameters. Also resets to the first page.
+   * 
+   * @param {Object} values - Form values containing filter parameters
+   */
   const handleFilterChange = (values) => {
     const newFilters = {
       ...filters
@@ -100,6 +104,11 @@ const Transactions = () => {
     dispatch(fetchTransactions({ page: 1, filters: newFilters }));
   };
 
+  /**
+   * Reset all filter criteria
+   * 
+   * Clears the filter form and fetches all transactions without filters
+   */
   const resetFilters = () => {
     form.resetFields();
     setFilters({
@@ -111,12 +120,25 @@ const Transactions = () => {
     dispatch(fetchTransactions({ page: 1, filters: {} }));
   };
 
-  // Delete transaction
+  /**
+   * Delete a transaction by ID
+   * 
+   * Dispatches the deleteTransaction action to remove a transaction
+   * from the database and updates the UI.
+   * 
+   * @param {string} id - The unique ID of the transaction to delete
+   */
   const handleDelete = (id) => {
     dispatch(deleteTransaction(id));
   };
 
-  // Edit transaction
+  /**
+   * Begin editing a transaction
+   * 
+   * Sets up the edit modal with the transaction's current values
+   * 
+   * @param {Object} transaction - The transaction object to edit
+   */
   const handleEdit = (transaction) => {
     setEditingTransaction({
       ...transaction,
@@ -125,6 +147,16 @@ const Transactions = () => {
     setEditMode(true);
   };
 
+  /**
+   * Handle changes in the transaction edit form
+   * 
+   * Updates the editing transaction state and handles special logic
+   * for recurring transaction fields (clearing recurring fields when
+   * isRecurring is set to false).
+   * 
+   * @param {Object} changedValues - The form values that changed
+   * @param {Object} allValues - All current form values
+   */
   const handleEditChange = (changedValues, allValues) => {
     // If isRecurring changed to false, remove the recurring fields
     let updatedTransaction = {...editingTransaction};
@@ -146,6 +178,13 @@ const Transactions = () => {
     setEditingTransaction(updatedTransaction);
   };
 
+  /**
+   * Submit transaction edit form
+   * 
+   * Formats the edited transaction data, handles dates, and
+   * dispatches the updateTransaction action. Cleans up the form
+   * and state after successful update.
+   */
   const handleEditSubmit = () => {
     // Format recurring end date if it exists
     let transactionData = {...editingTransaction};
@@ -171,56 +210,15 @@ const Transactions = () => {
     });
   };
 
-  // Add transaction
-  const handleAdd = () => {
-    setAddMode(true);
-    addForm.resetFields();
-    // Initialize with today's date
-    addForm.setFieldsValue({
-      date: moment(),
-      amount: ''
-    });
-  };
-
-  const handleAddChange = (changedValues, allValues) => {
-    setNewTransaction({
-      ...newTransaction,
-      ...allValues
-    });
-  };
-
-  const handleAddSubmit = () => {
-    addForm.validateFields()
-      .then(values => {
-        // Format the dates
-        const formattedValues = {
-          ...values,
-          date: values.date.format('YYYY-MM-DD'),
-          recurringEndDate: values.recurringEndDate ? values.recurringEndDate.format('YYYY-MM-DD') : null
-        };
-        
-        // Make sure recurringFrequency is only included when isRecurring is true
-        if (!formattedValues.isRecurring) {
-          delete formattedValues.recurringFrequency;
-          delete formattedValues.recurringEndDate;
-        }
-        
-        dispatch(createTransaction(formattedValues))
-          .unwrap()
-          .then(() => {
-            setAddMode(false);
-            message.success('Transaction added successfully');
-            dispatch(fetchTransactions({ page, filters }));
-          })
-          .catch(error => {
-            message.error('Failed to add transaction: ' + error);
-          });
-      })
-      .catch(info => {
-        console.log('Validate Failed:', info);
-      });
-  };
-
+  /**
+   * Handle pagination changes
+   * 
+   * Updates the current page and page size, and fetches the
+   * corresponding transactions.
+   * 
+   * @param {number} newPage - The new page number
+   * @param {number} newPageSize - The new page size
+   */
   const handlePageChange = (newPage, newPageSize) => {
     setPage(newPage);
     setPageSize(newPageSize);
@@ -231,7 +229,7 @@ const Transactions = () => {
     }));
   };
 
-  // Table columns
+  // Table columns configuration
   const columns = [
     {
       title: 'Date',
@@ -251,8 +249,26 @@ const Transactions = () => {
       dataIndex: 'category',
       key: 'category',
       render: category => (
-        <Tag color="blue">{category.name}</Tag>
+        <Tag color="blue">{category?.name}</Tag>
       )
+    },
+    {
+      title: 'Recurring',
+      dataIndex: 'isRecurring',
+      key: 'isRecurring',
+      render: (isRecurring, record) => {
+        if (!isRecurring) return '';
+        return (
+          <Tag color="purple">
+            {record.recurringFrequency ? record.recurringFrequency.charAt(0).toUpperCase() + record.recurringFrequency.slice(1) : 'Yes'}
+          </Tag>
+        );
+      },
+      filters: [
+        { text: 'One-time', value: false },
+        { text: 'Recurring', value: true }
+      ],
+      onFilter: (value, record) => record.isRecurring === value
     },
     {
       title: 'Amount',
@@ -273,11 +289,13 @@ const Transactions = () => {
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
+          {/* Edit Button */}
           <Button
             type="text"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           />
+          {/* Delete Confirmation */}
           <Popconfirm
             title="Are you sure you want to delete this transaction?"
             onConfirm={() => handleDelete(record.id)}
@@ -359,18 +377,7 @@ const Transactions = () => {
       
       <Divider />
       
-      <Card
-        title="Transaction List"
-        extra={
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
-            onClick={handleAdd}
-          >
-            Add Transaction
-          </Button>
-        }
-      >
+      <Card>
         <Table
           columns={columns}
           dataSource={transactions.map(tx => ({ ...tx, key: tx.id }))}
@@ -471,6 +478,14 @@ const Transactions = () => {
                 </Form.Item>
                 
                 <Form.Item
+                  name="recurringDuration"
+                  label="Duration"
+                  tooltip="Number of occurrences (e.g., 12 for a yearly subscription that renews for 12 years)"
+                >
+                  <Input type="number" min="1" step="1" placeholder="Number of occurrences" />
+                </Form.Item>
+                
+                <Form.Item
                   name="recurringEndDate"
                   label="End Date"
                 >
@@ -480,127 +495,6 @@ const Transactions = () => {
             )}
           </Form>
         )}
-      </Modal>
-      
-      {/* Add Transaction Modal */}
-      <Modal
-        title="Add New Transaction"
-        visible={addMode}
-        onOk={handleAddSubmit}
-        onCancel={() => setAddMode(false)}
-        okText="Add"
-        confirmLoading={loading}
-      >
-        <Form
-          form={addForm}
-          layout="vertical"
-          onValuesChange={handleAddChange}
-        >
-          <Form.Item
-            name="date"
-            label="Date"
-            rules={[{ required: true, message: 'Please select date!' }]}
-          >
-            <DatePicker style={{ width: '100%' }} />
-          </Form.Item>
-          
-          <Form.Item
-            name="description"
-            label="Description"
-          >
-            <Input placeholder="Enter transaction description" />
-          </Form.Item>
-          
-          <Form.Item
-            name="amount"
-            label="Amount"
-            rules={[
-              { required: true, message: 'Please enter amount!' },
-              { 
-                validator: (_, value) => {
-                  if (isNaN(value)) {
-                    return Promise.reject('Amount must be a number');
-                  }
-                  return Promise.resolve();
-                }
-              }
-            ]}
-            extra="Enter negative values for expenses, positive for income"
-          >
-            <Input type="number" step="0.01" placeholder="e.g. -25.99 for expense or 100.00 for income" />
-          </Form.Item>
-          
-          <Form.Item
-            name="categoryId"
-            label="Category"
-          >
-            <Select placeholder="Select a category">
-              {categories.map(category => (
-                <Option key={category.id} value={category.id}>
-                  {category.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          
-          <Form.Item
-            name="isRecurring"
-            label="Recurring Payment"
-            initialValue={false}
-          >
-            <Select>
-              <Option value={false}>No</Option>
-              <Option value={true}>Yes</Option>
-            </Select>
-          </Form.Item>
-          
-          <Form.Item
-            noStyle
-            shouldUpdate={(prevValues, currentValues) => prevValues.isRecurring !== currentValues.isRecurring}
-          >
-            {({ getFieldValue }) => 
-              getFieldValue('isRecurring') === true ? (
-                <>
-                  <Form.Item
-                    name="recurringFrequency"
-                    label="Frequency"
-                    rules={[{ required: true, message: 'Please select frequency!' }]}
-                  >
-                    <Select placeholder="Select frequency">
-                      <Option value="daily">Daily</Option>
-                      <Option value="weekly">Weekly</Option>
-                      <Option value="biweekly">Bi-weekly</Option>
-                      <Option value="monthly">Monthly</Option>
-                      <Option value="quarterly">Quarterly</Option>
-                      <Option value="annually">Annually</Option>
-                    </Select>
-                  </Form.Item>
-                  
-                  <Form.Item
-                    name="recurringEndDate"
-                    label="End Date"
-                  >
-                    <DatePicker style={{ width: '100%' }} />
-                  </Form.Item>
-                </>
-              ) : null
-            }
-          </Form.Item>
-          
-          <Form.Item
-            name="merchant"
-            label="Merchant"
-          >
-            <Input placeholder="Enter merchant name (optional)" />
-          </Form.Item>
-          
-          <Form.Item
-            name="notes"
-            label="Notes"
-          >
-            <Input.TextArea placeholder="Add any additional notes (optional)" rows={3} />
-          </Form.Item>
-        </Form>
       </Modal>
     </div>
   );

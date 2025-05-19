@@ -1,7 +1,27 @@
+/**
+ * Budget Controller
+ * 
+ * Handles all budget-related operations including creation, retrieval,
+ * updating, and deletion of budget records. This controller also provides
+ * endpoints for budget progress tracking and analysis.
+ * 
+ * Key features:
+ * - CRUD operations for budget management
+ * - Budget progress calculations
+ * - Category-specific budgeting
+ * - Budget performance statistics 
+ * - Period-based budget summaries
+ */
 const { Budget, Category, Transaction } = require('../models');
 const { Op } = require('sequelize');
 
-// Get all budgets for the authenticated user
+/**
+ * Get all budgets for the authenticated user
+ * 
+ * @route GET /api/budgets
+ * @access Private - Requires authentication
+ * @returns {Array} List of user's budget objects with category information
+ */
 exports.getBudgets = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -19,7 +39,14 @@ exports.getBudgets = async (req, res) => {
   }
 };
 
-// Get a single budget
+/**
+ * Get a single budget by ID
+ * 
+ * @route GET /api/budgets/:id
+ * @access Private - Requires authentication
+ * @param {string} req.params.id - Budget ID
+ * @returns {Object} Budget details with category information
+ */
 exports.getBudget = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -42,7 +69,21 @@ exports.getBudget = async (req, res) => {
   }
 };
 
-// Create a new budget
+/**
+ * Create a new budget
+ * 
+ * @route POST /api/budgets
+ * @access Private - Requires authentication
+ * @param {Object} req.body - Budget details
+ * @param {string} req.body.name - Budget name
+ * @param {number} req.body.amount - Budget amount
+ * @param {string} req.body.period - Budget period (daily, weekly, monthly, yearly, custom)
+ * @param {Date} req.body.startDate - Budget start date
+ * @param {Date} [req.body.endDate] - Budget end date (optional)
+ * @param {string} [req.body.categoryId] - Category ID (optional)
+ * @param {string} [req.body.notes] - Additional notes (optional)
+ * @returns {Object} Newly created budget
+ */
 exports.createBudget = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -53,14 +94,14 @@ exports.createBudget = async (req, res) => {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
     
-    // If categoryId is provided, check if it exists
+    // If categoryId is provided, check if it exists and belongs to user or is a default category
     if (categoryId) {
       const category = await Category.findOne({
         where: {
           id: categoryId,
           [Op.or]: [
-            { isDefault: true },
-            { userId }
+            { isDefault: true },  // Default categories available to all users
+            { userId }            // User's own categories
           ]
         }
       });
@@ -70,7 +111,7 @@ exports.createBudget = async (req, res) => {
       }
     }
     
-    // Create the budget
+    // Create the budget with validated data
     const budget = await Budget.create({
       name,
       amount,
@@ -89,7 +130,15 @@ exports.createBudget = async (req, res) => {
   }
 };
 
-// Update a budget
+/**
+ * Update an existing budget
+ * 
+ * @route PUT /api/budgets/:id
+ * @access Private - Requires authentication
+ * @param {string} req.params.id - Budget ID to update
+ * @param {Object} req.body - Updated budget details
+ * @returns {Object} Updated budget object
+ */
 exports.updateBudget = async (req, res) => {
   try {
     const userId = req.user.id;

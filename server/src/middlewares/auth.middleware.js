@@ -1,3 +1,16 @@
+/**
+ * Authentication Middleware
+ * 
+ * Protects API routes by:
+ * 1. Extracting the JWT token from the Authorization header
+ * 2. Verifying the token's validity and signature
+ * 3. Finding the corresponding user in the database
+ * 4. Attaching the user object to the request for use in controllers
+ * 
+ * If any step fails, returns appropriate error responses with status codes:
+ * - 401 for missing/invalid token or user not found
+ * - Specific message for expired tokens
+ */
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 

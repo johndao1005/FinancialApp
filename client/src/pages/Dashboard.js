@@ -1,3 +1,15 @@
+/**
+ * Dashboard Component
+ * 
+ * Main financial overview page that displays:
+ * 1. Summary cards with income, expenses, and balance totals
+ * 2. Monthly income vs. expenses line chart
+ * 3. Spending by category pie chart
+ * 4. Top merchants bar chart
+ * 5. Quick transaction entry form for adding new transactions
+ * 
+ * The dashboard data is automatically calculated from transaction history.
+ */
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
@@ -38,6 +50,8 @@ const { Title } = Typography;
 const Dashboard = () => {
   const dispatch = useDispatch();
   const { transactions, loading } = useSelector(state => state.transactions);
+  
+  // State for chart data
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
   const [topMerchants, setTopMerchants] = useState([]);
@@ -59,6 +73,12 @@ const Dashboard = () => {
     }
   }, [transactions]);
 
+  /**
+   * Process transaction data for monthly income/expense chart
+   * 
+   * Groups transactions by month, separates income and expenses,
+   * and sorts chronologically.
+   */
   const processMonthlyData = () => {
     // Group transactions by month
     const monthlyMap = transactions.reduce((acc, transaction) => {
@@ -94,6 +114,12 @@ const Dashboard = () => {
     setMonthlyData(result);
   };
 
+  /**
+   * Process transaction data for category pie chart
+   * 
+   * Groups expenses by category and calculates total spending
+   * for each category. Sorts by amount and limits to top 7 categories.
+   */
   const processCategoryData = () => {
     // Group transactions by category
     const categoryMap = transactions.reduce((acc, transaction) => {
@@ -121,6 +147,12 @@ const Dashboard = () => {
     setCategoryData(result);
   };
 
+  /**
+   * Process transaction data for top merchants bar chart
+   * 
+   * Groups expenses by merchant and calculates total spending
+   * for each. Sorts by amount and limits to top 5 merchants.
+   */
   const processTopMerchants = () => {
     // Group transactions by merchant
     const merchantMap = transactions.reduce((acc, transaction) => {
@@ -146,12 +178,18 @@ const Dashboard = () => {
     setTopMerchants(result);
   };
 
-  // Calculate totals and summary data
+  /**
+   * Calculate financial summary statistics
+   * 
+   * Computes total income, expenses, and balance from all transactions
+   * 
+   * @returns {Object} Summary containing income, expenses, and balance
+   */
   const calculateSummary = () => {
     if (!transactions.length) return { income: 0, expenses: 0, balance: 0 };
     
     return transactions.reduce((acc, transaction) => {
-      const amount = parseFloat(transaction.amount);
+      const amount = Math.abs(parseFloat(transaction.amount));
       
       if (transaction.isExpense) {
         acc.expenses += amount;
@@ -166,6 +204,7 @@ const Dashboard = () => {
 
   const { income, expenses, balance } = calculateSummary();
 
+  // Show loading spinner while transactions are being fetched
   if (loading) {
     return (
       <div style={{ 
@@ -181,6 +220,7 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: '24px' }}>
+      {/* Header with Title and Quick Transaction Entry */}
       <Row align="middle" justify="space-between" style={{ marginBottom: '16px' }}>
         <Col>
           <Typography.Title level={2}>Financial Dashboard</Typography.Title>
@@ -194,6 +234,7 @@ const Dashboard = () => {
       
       {/* Summary Cards */}
       <Row gutter={[16, 16]}>
+        {/* Income Card */}
         <Col xs={24} sm={8}>
           <Card>
             <Statistic
@@ -207,6 +248,7 @@ const Dashboard = () => {
           </Card>
         </Col>
         
+        {/* Expenses Card */}
         <Col xs={24} sm={8}>
           <Card>
             <Statistic
@@ -220,6 +262,7 @@ const Dashboard = () => {
           </Card>
         </Col>
         
+        {/* Balance Card */}
         <Col xs={24} sm={8}>
           <Card>
             <Statistic
@@ -238,7 +281,7 @@ const Dashboard = () => {
       
       {/* Charts */}
       <Row gutter={[16, 16]}>
-        {/* Monthly Income vs Expenses */}
+        {/* Monthly Income vs Expenses Line Chart */}
         <Col xs={24} lg={12}>
           <Card title="Monthly Overview">
             <ResponsiveContainer width="100%" height={300}>
@@ -255,7 +298,7 @@ const Dashboard = () => {
           </Card>
         </Col>
         
-        {/* Spending by Category */}
+        {/* Spending by Category Pie Chart */}
         <Col xs={24} lg={12}>
           <Card title="Spending by Category">
             <ResponsiveContainer width="100%" height={300}>
@@ -283,7 +326,7 @@ const Dashboard = () => {
       
       <Divider />
       
-      {/* Top Merchants */}
+      {/* Top Merchants Bar Chart */}
       <Row gutter={[16, 16]}>
         <Col span={24}>
           <Card title="Top Merchants">

@@ -1,18 +1,43 @@
+/**
+ * Transaction Slice
+ * 
+ * Redux Toolkit slice for managing transaction state and operations.
+ * Provides async thunks for:
+ * - Fetching transactions with filtering and pagination
+ * - Getting individual transaction details 
+ * - Creating new transactions (one-time and recurring)
+ * - Updating existing transactions
+ * - Deleting transactions
+ * - Importing transactions from CSV files
+ */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../utils/axios';
 
 // Initial state
 const initialState = {
-  transactions: [],
-  transaction: null,
-  loading: false,
-  error: null,
-  totalCount: 0,
-  totalPages: 0,
-  currentPage: 1
+  transactions: [],     // List of transactions
+  transaction: null,    // Single transaction for viewing/editing
+  loading: false,       // Loading state for async operations
+  error: null,          // Error messages if any
+  totalCount: 0,        // Total count of all transactions for pagination
+  totalPages: 0,        // Total number of pages
+  currentPage: 1        // Current active page
 };
 
-// Fetch transactions
+/**
+ * Fetch transactions with filters
+ * 
+ * Async thunk to retrieve transactions with:
+ * - Pagination support (page, limit)
+ * - Date range filtering
+ * - Category filtering
+ * 
+ * @param {Object} params - Parameters for fetching transactions
+ * @param {number} params.page - Page number (defaults to 1)
+ * @param {number} params.limit - Results per page (defaults to 20)
+ * @param {Object} params.filters - Filter criteria
+ * @returns {Object} Transaction list, pagination info
+ */
 export const fetchTransactions = createAsyncThunk(
   'transactions/fetchTransactions',
   async ({ page = 1, limit = 20, filters = {} }, { rejectWithValue }) => {
@@ -38,7 +63,14 @@ export const fetchTransactions = createAsyncThunk(
   }
 );
 
-// Fetch single transaction
+/**
+ * Fetch a single transaction by ID
+ * 
+ * Used for viewing or editing a specific transaction's details
+ * 
+ * @param {string} id - ID of the transaction to fetch
+ * @returns {Object} Transaction data
+ */
 export const fetchTransaction = createAsyncThunk(
   'transactions/fetchTransaction',
   async (id, { rejectWithValue }) => {
@@ -53,7 +85,15 @@ export const fetchTransaction = createAsyncThunk(
   }
 );
 
-// Create new transaction
+/**
+ * Create a new transaction
+ * 
+ * Handles creating both one-time and recurring transactions
+ * with all required properties
+ * 
+ * @param {Object} transactionData - New transaction data
+ * @returns {Object} Created transaction
+ */
 export const createTransaction = createAsyncThunk(
   'transactions/createTransaction',
   async (transactionData, { rejectWithValue }) => {

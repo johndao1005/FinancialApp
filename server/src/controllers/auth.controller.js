@@ -1,7 +1,27 @@
+/**
+ * Authentication Controller
+ * 
+ * Handles user authentication operations:
+ * - User registration with password hashing
+ * - User login with credential verification
+ * - JWT token generation for authenticated sessions
+ * - Logout functionality
+ */
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
+/**
+ * User Registration
+ * 
+ * Creates a new user account with:
+ * - Duplicate email check
+ * - Password hashing for security
+ * - JWT token generation for immediate login
+ * 
+ * @param {Object} req - Express request object with user details
+ * @param {Object} res - Express response object
+ */
 exports.register = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
@@ -31,6 +51,7 @@ exports.register = async (req, res) => {
       { expiresIn: '1d' }
     );
 
+    // Return user data and token
     res.status(201).json({
       id: user.id,
       firstName: user.firstName,
@@ -47,8 +68,6 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    console.log('check user');
     // Check if user exists
     const user = await User.findOne({ where: { email } });
     if (!user) {

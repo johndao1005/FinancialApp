@@ -1,12 +1,22 @@
+/**
+ * Authentication Slice
+ * 
+ * Manages user authentication state and operations:
+ * 1. User registration and login
+ * 2. Loading authenticated user data
+ * 3. Logout functionality
+ * 4. Token storage in localStorage
+ * 5. Error handling for auth operations
+ */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../utils/axios';
 
 // Define the initial state
 const initialState = {
-  user: null,
-  isAuthenticated: false,
-  loading: false,
-  error: null
+  user: null,             // User data when authenticated
+  isAuthenticated: false, // Authentication status
+  loading: false,         // Loading state for async operations
+  error: null            // Error messages if any
 };
 
 // Async thunks for authentication

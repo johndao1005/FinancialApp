@@ -1,16 +1,51 @@
+/**
+ * Budget Redux Slice
+ * 
+ * Manages the state for budget-related functionality in the application.
+ * Handles fetching, creating, updating, and deleting budget records,
+ * as well as tracking budget progress and performance metrics.
+ * 
+ * This slice includes:
+ * - Async thunks for API interactions
+ * - Reducers for state management
+ * - Selectors for accessing budget data
+ * 
+ * The state maintains:
+ * - List of user budgets
+ * - Currently selected budget
+ * - Budget progress tracking
+ * - Loading and error states
+ */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../utils/axios';
 
-// Initial state
+/**
+ * Initial state for the budget slice
+ * 
+ * @property {Array} budgets - List of all user budgets
+ * @property {Object|null} currentBudget - Currently selected budget details
+ * @property {Object|null} budgetProgress - Progress data for the current budget
+ * @property {boolean} loading - Indicates if an API request is in progress
+ * @property {string|null} error - Error message from the last failed operation
+ */
 const initialState = {
-  budgets: [],
-  currentBudget: null,
-  budgetProgress: null,
-  loading: false,
-  error: null
+  budgets: [],         // Array of budget objects
+  currentBudget: null, // Current selected budget details
+  budgetProgress: null, // Budget spending progress data
+  loading: false,      // Loading state for async operations
+  error: null          // Error message if any
 };
 
-// Async thunks
+/**
+ * Async Thunks for Budget Operations
+ */
+
+/**
+ * Fetches all budgets for the current user
+ * 
+ * @returns {Array} List of budget objects
+ * @throws Will reject with error message if API call fails
+ */
 export const fetchBudgets = createAsyncThunk(
   'budget/fetchBudgets',
   async (_, { rejectWithValue }) => {
@@ -25,6 +60,13 @@ export const fetchBudgets = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches a single budget by ID
+ * 
+ * @param {string} id - Budget ID to fetch
+ * @returns {Object} Budget details
+ * @throws Will reject with error message if API call fails
+ */
 export const fetchBudget = createAsyncThunk(
   'budget/fetchBudget',
   async (id, { rejectWithValue }) => {
@@ -39,6 +81,13 @@ export const fetchBudget = createAsyncThunk(
   }
 );
 
+/**
+ * Fetches progress data for a specific budget
+ * 
+ * @param {string} id - Budget ID to fetch progress for
+ * @returns {Object} Budget progress data including spent amount and percentage
+ * @throws Will reject with error message if API call fails
+ */
 export const fetchBudgetProgress = createAsyncThunk(
   'budget/fetchBudgetProgress',
   async (id, { rejectWithValue }) => {
