@@ -43,7 +43,9 @@ const QuickTransactionEntry = ({ onSuccess }) => {
 
   // Common expense categories
   const expenseCategories = [
-    'Food & Dining', 
+    'Uncategorized',
+    'Dining', 
+    'Groceries',
     'Transportation', 
     'Housing', 
     'Utilities', 
@@ -58,6 +60,7 @@ const QuickTransactionEntry = ({ onSuccess }) => {
 
   // Common income categories
   const incomeCategories = [
+    'Uncategorized',
     'Salary', 
     'Freelance', 
     'Investments', 
@@ -146,7 +149,7 @@ const QuickTransactionEntry = ({ onSuccess }) => {
             date: moment(),
             amount: '',
             isExpense: true,
-            category: isExpense ? 'Food & Dining' : 'Salary',
+            category: 'Uncategorized',
             description: '',
             merchant: '',
             recurringFrequency: 'one-off'
@@ -161,7 +164,7 @@ const QuickTransactionEntry = ({ onSuccess }) => {
               onChange={(checked) => {
                 setIsExpense(checked);
                 form.setFieldsValue({
-                  category: checked ? 'Food & Dining' : 'Salary'
+                  category: 'Uncategorized'
                 });
               }}
             />

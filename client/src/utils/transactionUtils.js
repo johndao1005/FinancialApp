@@ -1,12 +1,30 @@
 /**
- * Utility functions for transaction operations
+ * Transaction Utility Functions
+ * 
+ * This module provides utility functions for handling transaction operations
+ * throughout the application. These helpers simplify common transaction tasks
+ * like creating transactions, handling recurring transactions, and formatting
+ * transaction data.
+ * 
+ * Key features:
+ * - Simplified transaction creation
+ * - Dedicated helpers for expenses and income
+ * - Date formatting for transactions
+ * - Recurring transaction support
+ * - Redux store integration
  */
 import { createTransaction } from '../redux/slices/transactionSlice';
 import { store } from '../redux/store';
 import moment from 'moment';
 
 /**
- * Quick add a new transaction
+ * Creates and dispatches a new transaction with simplified formatting.
+ * 
+ * This function handles proper formatting of transaction data before
+ * dispatching to the Redux store. It automatically converts moment objects
+ * to properly formatted date strings and ensures recurring transaction
+ * fields are handled correctly.
+ * 
  * @param {Object} transactionData - Transaction data object
  * @param {number|string} transactionData.amount - Transaction amount (negative for expenses, positive for income)
  * @param {string} [transactionData.description] - Transaction description (optional)
@@ -49,6 +67,7 @@ export const quickAddTransaction = async (transactionData) => {
   // Format the dates if they're moment objects
   const formattedData = {
     ...transactionData,
+    // Convert moment date object to YYYY-MM-DD string format if needed
     date: transactionData.date instanceof moment 
       ? transactionData.date.format('YYYY-MM-DD') 
       : transactionData.date
@@ -67,17 +86,22 @@ export const quickAddTransaction = async (transactionData) => {
     delete formattedData.recurringEndDate;
   }
   
-  // Use the Redux store directly
+  // Dispatch the action to Redux store and return the unwrapped promise
   return store.dispatch(createTransaction(formattedData)).unwrap();
 };
 
 /**
- * Quick add expense (with negative amount)
+ * Specialized helper for quickly adding expense transactions.
+ * 
+ * Ensures the transaction amount is negative to represent an expense.
+ * This is a convenience wrapper around quickAddTransaction that guarantees
+ * the amount is properly formatted as an expense.
+ * 
  * @param {Object} expenseData - Expense data object
  * @returns {Promise} - Promise that resolves when expense is added
  */
 export const quickAddExpense = async (expenseData) => {
-  // Make sure amount is negative
+  // Make sure amount is negative (expenses are represented by negative values)
   const amount = parseFloat(expenseData.amount);
   return quickAddTransaction({
     ...expenseData,
@@ -86,12 +110,17 @@ export const quickAddExpense = async (expenseData) => {
 };
 
 /**
- * Quick add income (with positive amount)
+ * Specialized helper for quickly adding income transactions.
+ * 
+ * Ensures the transaction amount is positive to represent income.
+ * This is a convenience wrapper around quickAddTransaction that guarantees
+ * the amount is properly formatted as income.
+ * 
  * @param {Object} incomeData - Income data object
  * @returns {Promise} - Promise that resolves when income is added
  */
 export const quickAddIncome = async (incomeData) => {
-  // Make sure amount is positive
+  // Make sure amount is positive (income is represented by positive values)
   const amount = parseFloat(incomeData.amount);
   return quickAddTransaction({
     ...incomeData,

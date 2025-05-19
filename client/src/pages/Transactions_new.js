@@ -1,13 +1,3 @@
-/**
- * Transactions Component
- * 
- * Main page for managing financial transactions. This component provides:
- * 1. A filterable and sortable table of all transactions
- * 2. Date range and category filtering
- * 3. Editing capabilities for existing transactions
- * 4. Support for recurring transaction management
- * 5. Pagination for handling large transaction histories
- */
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
@@ -25,16 +15,14 @@ import {
   Popconfirm,
   Divider,
   Row,
-  Col,
-  Radio
+  Col
 } from 'antd';
 import {
   SearchOutlined,
   EditOutlined,
   DeleteOutlined,
   FilterOutlined,
-  ReloadOutlined,
-  CalendarOutlined
+  ReloadOutlined
 } from '@ant-design/icons';
 import moment from 'moment';
 import { 
@@ -43,7 +31,6 @@ import {
   updateTransaction 
 } from '../redux/slices/transactionSlice';
 import { fetchCategories } from '../redux/slices/categorySlice';
-import TopMerchantsChart from '../components/TopMerchantsChart';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -51,7 +38,6 @@ const { Option } = Select;
 
 const Transactions = () => {
   const dispatch = useDispatch();
-  // Redux state selectors
   const { transactions, loading, totalPages, currentPage } = useSelector(state => state.transactions);
   const { categories } = useSelector(state => state.categories);
   
@@ -64,9 +50,6 @@ const Transactions = () => {
     category: ''
   });
   
-  // For time frame selection for charts
-  const [timeFrame, setTimeFrame] = useState('month'); // 'week', 'month', 'year'
-  
   // For editing transactions
   const [editMode, setEditMode] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
@@ -78,14 +61,7 @@ const Transactions = () => {
     dispatch(fetchCategories());
   }, [dispatch, page]);
 
-  /**
-   * Apply filter criteria to transaction list
-   * 
-   * Handles date range and category filters and refreshes transaction list
-   * with the new filter parameters. Also resets to the first page.
-   * 
-   * @param {Object} values - Form values containing filter parameters
-   */
+  // Apply filters
   const handleFilterChange = (values) => {
     const newFilters = {
       ...filters
@@ -110,11 +86,6 @@ const Transactions = () => {
     dispatch(fetchTransactions({ page: 1, filters: newFilters }));
   };
 
-  /**
-   * Reset all filter criteria
-   * 
-   * Clears the filter form and fetches all transactions without filters
-   */
   const resetFilters = () => {
     form.resetFields();
     setFilters({
@@ -126,25 +97,12 @@ const Transactions = () => {
     dispatch(fetchTransactions({ page: 1, filters: {} }));
   };
 
-  /**
-   * Delete a transaction by ID
-   * 
-   * Dispatches the deleteTransaction action to remove a transaction
-   * from the database and updates the UI.
-   * 
-   * @param {string} id - The unique ID of the transaction to delete
-   */
+  // Delete transaction
   const handleDelete = (id) => {
     dispatch(deleteTransaction(id));
   };
 
-  /**
-   * Begin editing a transaction
-   * 
-   * Sets up the edit modal with the transaction's current values
-   * 
-   * @param {Object} transaction - The transaction object to edit
-   */
+  // Edit transaction
   const handleEdit = (transaction) => {
     setEditingTransaction({
       ...transaction,
@@ -153,16 +111,6 @@ const Transactions = () => {
     setEditMode(true);
   };
 
-  /**
-   * Handle changes in the transaction edit form
-   * 
-   * Updates the editing transaction state and handles special logic
-   * for recurring transaction fields (clearing recurring fields when
-   * isRecurring is set to false).
-   * 
-   * @param {Object} changedValues - The form values that changed
-   * @param {Object} allValues - All current form values
-   */
   const handleEditChange = (changedValues, allValues) => {
     // If isRecurring changed to false, remove the recurring fields
     let updatedTransaction = {...editingTransaction};
@@ -184,13 +132,6 @@ const Transactions = () => {
     setEditingTransaction(updatedTransaction);
   };
 
-  /**
-   * Submit transaction edit form
-   * 
-   * Formats the edited transaction data, handles dates, and
-   * dispatches the updateTransaction action. Cleans up the form
-   * and state after successful update.
-   */
   const handleEditSubmit = () => {
     // Format recurring end date if it exists
     let transactionData = {...editingTransaction};
@@ -216,15 +157,6 @@ const Transactions = () => {
     });
   };
 
-  /**
-   * Handle pagination changes
-   * 
-   * Updates the current page and page size, and fetches the
-   * corresponding transactions.
-   * 
-   * @param {number} newPage - The new page number
-   * @param {number} newPageSize - The new page size
-   */
   const handlePageChange = (newPage, newPageSize) => {
     setPage(newPage);
     setPageSize(newPageSize);
@@ -235,14 +167,7 @@ const Transactions = () => {
     }));
   };
 
-  /**
-   * Handle time frame change for charts
-   */
-  const handleTimeFrameChange = (e) => {
-    setTimeFrame(e.target.value);
-  };
-
-  // Table columns configuration
+  // Table columns
   const columns = [
     {
       title: 'Date',
@@ -262,7 +187,7 @@ const Transactions = () => {
       dataIndex: 'category',
       key: 'category',
       render: category => (
-        <Tag color="blue">{category?.name}</Tag>
+        <Tag color="blue">{category.name}</Tag>
       )
     },
     {
@@ -302,13 +227,11 @@ const Transactions = () => {
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
-          {/* Edit Button */}
           <Button
             type="text"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           />
-          {/* Delete Confirmation */}
           <Popconfirm
             title="Are you sure you want to delete this transaction?"
             onConfirm={() => handleDelete(record.id)}
@@ -405,30 +328,6 @@ const Transactions = () => {
           scroll={{ x: 'max-content' }}
         />
       </Card>
-      
-      {/* Top Merchants Chart */}
-      <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-        <Col span={24}>
-          <Card title="Top Merchants by Expense" extra={
-            <Space>
-              <CalendarOutlined />
-              <span>Time Frame:</span>
-              <Radio.Group 
-                value={timeFrame} 
-                onChange={handleTimeFrameChange}
-              >
-                <Radio.Button value="week">Last 7 Days</Radio.Button>
-                <Radio.Button value="month">Last Month</Radio.Button>
-                <Radio.Button value="year">Last Year</Radio.Button>
-              </Radio.Group>
-            </Space>
-          }>
-            <TopMerchantsChart transactions={transactions} timeFrame={timeFrame} />
-          </Card>
-        </Col>
-      </Row>
-      
-      <Divider />
       
       {/* Edit Transaction Modal */}
       <Modal

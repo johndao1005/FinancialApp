@@ -124,10 +124,64 @@ exports.getTransaction = async (req, res) => {
 exports.createTransaction = async (req, res) => {
   try {
     const userId = req.user.id;
-    const transaction = await Transaction.create({
-      ...req.body,
-      userId
-    });
+    let transactionData = { ...req.body, userId };
+    
+    // If category is provided as a string name, look up the categoryId
+    if (req.body.category && typeof req.body.category === 'string') {
+      let categoryName = req.body.category;
+      
+      // Handle common category name variations
+      const categoryMapping = {
+        'Food & Dining': 'Dining',
+        'Food and Dining': 'Dining'
+      };
+      
+      if (categoryMapping[categoryName]) {
+        categoryName = categoryMapping[categoryName];
+      }
+      
+      // First try to find a user-specific category with this name
+      let category = await Category.findOne({
+        where: {
+          name: categoryName,
+          userId
+        }
+      });
+      
+      // If not found, look for a default category with this name
+      if (!category) {
+        category = await Category.findOne({
+          where: {
+            name: categoryName,
+            isDefault: true
+          }
+        });
+      }
+      
+      // If a category was found, use its ID
+      if (category) {
+        console.log(`Found category: ${category.name} (${category.id})`);
+        transactionData.categoryId = category.id;
+      } else {
+        console.log(`Category not found: ${categoryName}, using Uncategorized instead`);
+        // If no matching category is found, try to find the Uncategorized category
+        const uncategorized = await Category.findOne({
+          where: {
+            name: 'Uncategorized',
+            isDefault: true
+          }
+        });
+        
+        if (uncategorized) {
+          transactionData.categoryId = uncategorized.id;
+        }
+      }
+      
+      // Remove the original category name from the data since we're using categoryId
+      delete transactionData.category;
+    }
+    
+    const transaction = await Transaction.create(transactionData);
     
     res.status(201).json(transaction);
   } catch (error) {

@@ -7,6 +7,7 @@
  * 3. Spending by category pie chart
  * 4. Top merchants bar chart
  * 5. Quick transaction entry form for adding new transactions
+ * 6. Recent transactions table
  * 
  * The dashboard data is automatically calculated from transaction history.
  */
@@ -20,12 +21,17 @@ import {
   Statistic, 
   Spin, 
   Divider,
-  Space
+  Space,
+  Table,
+  Tag,
+  Radio,
+  Button
 } from 'antd';
 import { 
   ArrowUpOutlined, 
   ArrowDownOutlined, 
-  DollarOutlined 
+  DollarOutlined,
+  CalendarOutlined
 } from '@ant-design/icons';
 import { 
   PieChart, 
@@ -38,9 +44,7 @@ import {
   CartesianGrid, 
   Tooltip, 
   Legend, 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar 
+  ResponsiveContainer
 } from 'recharts';
 import { fetchTransactions } from '../redux/slices/transactionSlice';
 import QuickTransactionEntry from '../components/QuickTransactionEntry';
@@ -54,14 +58,15 @@ const Dashboard = () => {
   // State for chart data
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
-  const [topMerchants, setTopMerchants] = useState([]);
+  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [timeFrame, setTimeFrame] = useState('month'); // 'week', 'month', 'year'
 
   // Colors for charts
   const COLORS = ['#1677ff', '#52c41a', '#faad14', '#f5222d', '#722ed1', '#13c2c2', '#fa8c16'];
 
   useEffect(() => {
     // Fetch transactions on component mount
-    dispatch(fetchTransactions({}));
+    dispatch(fetchTransactions({ limit: 100 })); // Increase limit to get more data for filtering
   }, [dispatch]);
 
   useEffect(() => {
@@ -69,9 +74,9 @@ const Dashboard = () => {
       // Process data for charts
       processMonthlyData();
       processCategoryData();
-      processTopMerchants();
+      processRecentTransactions();
     }
-  }, [transactions]);
+  }, [transactions, timeFrame]);
 
   /**
    * Process transaction data for monthly income/expense chart
@@ -80,8 +85,17 @@ const Dashboard = () => {
    * and sorts chronologically.
    */
   const processMonthlyData = () => {
+    // Get date range based on the selected time frame
+    const { startDate, endDate } = getDateRange();
+    
+    // Filter transactions based on date range
+    const filteredTransactions = transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= startDate && transactionDate <= endDate;
+    });
+    
     // Group transactions by month
-    const monthlyMap = transactions.reduce((acc, transaction) => {
+    const monthlyMap = filteredTransactions.reduce((acc, transaction) => {
       const date = new Date(transaction.date);
       const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
       
@@ -113,6 +127,32 @@ const Dashboard = () => {
     
     setMonthlyData(result);
   };
+  
+  /**
+   * Get the date range based on selected timeframe
+   * 
+   * @returns {Object} startDate and endDate objects
+   */
+  const getDateRange = () => {
+    const endDate = new Date();
+    let startDate = new Date();
+    
+    switch(timeFrame) {
+      case 'week':
+        startDate.setDate(endDate.getDate() - 7);
+        break;
+      case 'month':
+        startDate.setMonth(endDate.getMonth() - 1);
+        break;
+      case 'year':
+        startDate.setFullYear(endDate.getFullYear() - 1);
+        break;
+      default:
+        startDate.setMonth(endDate.getMonth() - 1);
+    }
+    
+    return { startDate, endDate };
+  };
 
   /**
    * Process transaction data for category pie chart
@@ -121,8 +161,17 @@ const Dashboard = () => {
    * for each category. Sorts by amount and limits to top 7 categories.
    */
   const processCategoryData = () => {
+    // Get date range based on the selected time frame
+    const { startDate, endDate } = getDateRange();
+    
+    // Filter transactions based on date range
+    const filteredTransactions = transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= startDate && transactionDate <= endDate;
+    });
+    
     // Group transactions by category
-    const categoryMap = transactions.reduce((acc, transaction) => {
+    const categoryMap = filteredTransactions.reduce((acc, transaction) => {
       if (transaction.isExpense) {
         const categoryName = transaction.category ? transaction.category.name : 'Uncategorized';
         
@@ -148,47 +197,26 @@ const Dashboard = () => {
   };
 
   /**
-   * Process transaction data for top merchants bar chart
-   * 
-   * Groups expenses by merchant and calculates total spending
-   * for each. Sorts by amount and limits to top 5 merchants.
-   */
-  const processTopMerchants = () => {
-    // Group transactions by merchant
-    const merchantMap = transactions.reduce((acc, transaction) => {
-      if (transaction.isExpense && transaction.merchant) {
-        if (!acc[transaction.merchant]) {
-          acc[transaction.merchant] = {
-            name: transaction.merchant,
-            amount: 0
-          };
-        }
-        
-        acc[transaction.merchant].amount += parseFloat(transaction.amount);
-      }
-      
-      return acc;
-    }, {});
-    
-    // Convert to array and sort by amount
-    const result = Object.values(merchantMap)
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 5); // Top 5 merchants
-    
-    setTopMerchants(result);
-  };
-
-  /**
    * Calculate financial summary statistics
    * 
    * Computes total income, expenses, and balance from all transactions
+   * within the selected time frame
    * 
    * @returns {Object} Summary containing income, expenses, and balance
    */
   const calculateSummary = () => {
     if (!transactions.length) return { income: 0, expenses: 0, balance: 0 };
     
-    return transactions.reduce((acc, transaction) => {
+    // Get date range based on the selected time frame
+    const { startDate, endDate } = getDateRange();
+    
+    // Filter transactions based on date range
+    const filteredTransactions = transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= startDate && transactionDate <= endDate;
+    });
+    
+    return filteredTransactions.reduce((acc, transaction) => {
       const amount = Math.abs(parseFloat(transaction.amount));
       
       if (transaction.isExpense) {
@@ -201,6 +229,74 @@ const Dashboard = () => {
       return acc;
     }, { income: 0, expenses: 0, balance: 0 });
   };
+
+  /**
+   * Process top 10 recent transactions for the table
+   */
+  const processRecentTransactions = () => {
+    // Get date range based on the selected time frame
+    const { startDate, endDate } = getDateRange();
+    
+    // Filter transactions based on date range
+    const filteredTransactions = transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= startDate && transactionDate <= endDate;
+    });
+    
+    const formattedTransactions = filteredTransactions
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 10)
+      .map(transaction => ({
+        key: transaction.id,
+        id: transaction.id,
+        date: new Date(transaction.date).toLocaleDateString(),
+        description: transaction.description || 'No description',
+        category: transaction.category ? transaction.category.name : 'Uncategorized',
+        amount: parseFloat(transaction.amount).toFixed(2),
+        isExpense: transaction.isExpense
+      }));
+    
+    setRecentTransactions(formattedTransactions);
+  };
+
+  /**
+   * Handle time frame change
+   */
+  const handleTimeFrameChange = (e) => {
+    setTimeFrame(e.target.value);
+  };
+
+  // Columns for the recent transactions table
+  const columns = [
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
+    },
+    {
+      title: 'Category',
+      dataIndex: 'category',
+      key: 'category',
+      render: (text) => (
+        <Tag color="blue">{text}</Tag>
+      )
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: (text, record) => (
+        <span style={{ color: record.isExpense ? '#f5222d' : '#52c41a' }}>
+          {record.isExpense ? '-' : '+'} ${text}
+        </span>
+      )
+    }
+  ];
 
   const { income, expenses, balance } = calculateSummary();
 
@@ -229,6 +325,26 @@ const Dashboard = () => {
           <QuickTransactionEntry 
             onSuccess={() => dispatch(fetchTransactions({}))} 
           />
+        </Col>
+      </Row>
+      
+      {/* Time Frame Selector */}
+      <Row style={{ marginBottom: '16px' }}>
+        <Col>
+          <Card>
+            <Space>
+              <CalendarOutlined />
+              <span>Time Frame:</span>
+              <Radio.Group 
+                value={timeFrame} 
+                onChange={handleTimeFrameChange}
+              >
+                <Radio.Button value="week">Last 7 Days</Radio.Button>
+                <Radio.Button value="month">Last Month</Radio.Button>
+                <Radio.Button value="year">Last Year</Radio.Button>
+              </Radio.Group>
+            </Space>
+          </Card>
         </Col>
       </Row>
       
@@ -326,19 +442,16 @@ const Dashboard = () => {
       
       <Divider />
       
-      {/* Top Merchants Bar Chart */}
+      {/* Recent Transactions Table */}
       <Row gutter={[16, 16]}>
         <Col span={24}>
-          <Card title="Top Merchants">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topMerchants}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                <Bar dataKey="amount" fill="#1677ff" />
-              </BarChart>
-            </ResponsiveContainer>
+          <Card title="Recent Transactions">
+            <Table 
+              dataSource={recentTransactions} 
+              columns={columns} 
+              pagination={false}
+              rowKey="id"
+            />
           </Card>
         </Col>
       </Row>
