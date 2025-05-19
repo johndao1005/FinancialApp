@@ -108,8 +108,8 @@ const Budgets = () => {
         name: values.name,
         amount: values.amount,
         period: values.period,
-        startDate: values.dateRange[0].format(),
-        endDate: values.dateRange[1] ? values.dateRange[1].format() : null,
+        startDate: values.dateRange[0].format('YYYY-MM-DD'),
+        endDate: values.dateRange[1] ? values.dateRange[1].format('YYYY-MM-DD') : null,
         categoryId: values.categoryId,
         notes: values.notes
       };

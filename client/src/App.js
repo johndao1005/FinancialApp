@@ -26,6 +26,7 @@ import Budgets from './pages/Budgets/Budgets';
 import Goals from './pages/Goals/Goals';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
+import { ROUTES, PRIMARY_COLORS, UI_SIZES } from './constants';
 import './styles/App.css';
 
 const { Content } = Layout;
@@ -39,8 +40,8 @@ function App() {
       theme={{
         algorithm: theme.defaultAlgorithm,
         token: {
-          colorPrimary: '#1677ff', // Custom primary color
-          borderRadius: 6,
+          colorPrimary: PRIMARY_COLORS.MAIN,
+          borderRadius: UI_SIZES.BORDER_RADIUS,
         },
       }}
     >
@@ -55,13 +56,14 @@ function App() {
                 <Routes>
                   {/* Protected Routes - Only accessible when logged in */}
                   <Route element={<PrivateRoute />}>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/transactions" element={<Transactions />} />
-                    <Route path="/upload" element={<UploadStatement />} />
-                    <Route path="/budgets" element={<Budgets />} />
-                    <Route path="/goals" element={<Goals />} />
+                    <Route path={ROUTES.DASHBOARD.path} element={<Dashboard />} />
+                    <Route path={ROUTES.TRANSACTIONS.path} element={<Transactions />} />
+                    <Route path={ROUTES.UPLOAD.path} element={<UploadStatement />} />
+                    <Route path={ROUTES.PROFILE.path} element={<Profile />} />
+                    <Route path={ROUTES.BUDGETS.path} element={<Budgets />} />
+                    <Route path={ROUTES.GOALS.path} element={<Goals />} />
                   </Route>
-        N          <Route path="*" element={<Navigate to="/" />} />
+                  <Route path="*" element={<Navigate to={ROUTES.DASHBOARD.path} />} />
                 </Routes>
               </Content>
             </Layout>
@@ -70,9 +72,9 @@ function App() {
           <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '24px' }}>
             {/* Unauthenticated Layout - Login/Register pages */}
             <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="*" element={<Navigate to="/login" />} />
+              <Route path={ROUTES.LOGIN.path} element={<Login />} />
+              <Route path={ROUTES.REGISTER.path} element={<Register />} />
+              <Route path="*" element={<Navigate to={ROUTES.LOGIN.path} />} />
             </Routes>
           </Content>
         )}

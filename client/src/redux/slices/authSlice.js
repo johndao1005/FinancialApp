@@ -10,6 +10,8 @@
  */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../utils/axios';
+import { AUTH_API, USER_API } from '../../constants';
+
 
 // Define the initial state
 const initialState = {
@@ -24,7 +26,7 @@ export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await axios.post(AUTH_API.REGISTER, userData);
       localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
@@ -39,7 +41,7 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/auth/login', userData);
+      const response = await axios.post(AUTH_API.LOGIN, userData);
       localStorage.setItem('token', response.data.token);
       return response.data;
     } catch (error) {
@@ -60,7 +62,7 @@ export const loadUser = createAsyncThunk(
     }
     
     try {
-      const response = await axios.get('/api/users/profile', {
+      const response = await axios.get(USER_API.PROFILE, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -95,7 +97,7 @@ export const updateProfile = createAsyncThunk(
       };
       
       console.log('Sending profile update:', formattedData);
-      const response = await axios.put('/api/users/profile', formattedData);
+      const response = await axios.put(USER_API.PROFILE, formattedData);
       
       // Add a formatted name field to the response so it's easier to use in the UI
       const user = response.data;

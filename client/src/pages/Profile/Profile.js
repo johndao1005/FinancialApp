@@ -18,6 +18,7 @@ import {
   SettingOutlined
 } from '@ant-design/icons';
 import { updateProfile, loadUser } from '../../redux/slices/authSlice';
+import { USER_API } from '../../constants';
 
 // Import components
 import ProfileForm from './component/ProfileForm';
@@ -65,7 +66,7 @@ const Profile = () => {
     setError(null);
     
     try {
-      await axios.put('/api/users/password', {
+      await axios.put(USER_API.PASSWORD, {
         currentPassword: values.currentPassword,
         newPassword: values.newPassword
       });

@@ -53,7 +53,10 @@ const TransactionEditForm = ({
             label="Date"
             rules={[{ required: true, message: 'Please select a date' }]}
           >
-            <DatePicker style={{ width: '100%' }} />
+            <DatePicker 
+              style={{ width: '100%' }}
+              format="YYYY-MM-DD"
+            />
           </Form.Item>
         </Col>
       </Row>
@@ -137,6 +140,7 @@ const TransactionEditForm = ({
               >
                 <DatePicker 
                   style={{ width: '100%' }}
+                  format="YYYY-MM-DD"
                   disabledDate={(current) => current && current < moment().endOf('day')}
                 />
               </Form.Item>

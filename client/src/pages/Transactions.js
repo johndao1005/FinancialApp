@@ -196,6 +196,10 @@ const Transactions = () => {
     let transactionData = {...editingTransaction};
     
     // Format the dates if they exist
+    if (transactionData.date && typeof transactionData.date !== 'string') {
+      transactionData.date = transactionData.date.format('YYYY-MM-DD');
+    }
+    
     if (transactionData.recurringEndDate && typeof transactionData.recurringEndDate !== 'string') {
       transactionData.recurringEndDate = transactionData.recurringEndDate.format('YYYY-MM-DD');
     }

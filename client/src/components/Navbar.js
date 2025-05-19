@@ -11,18 +11,15 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Layout, Menu, Button, Avatar, Dropdown } from 'antd';
-import {
-  DashboardOutlined,
-  TransactionOutlined,
-  UploadOutlined,
-  UserOutlined,
-  LogoutOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  DollarOutlined,
-  FlagOutlined
-} from '@ant-design/icons';
+import { MenuFoldOutlined, UserOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { logout } from '../redux/slices/authSlice';
+import { 
+  ROUTES, 
+  USER_MENU_ITEMS, 
+  APP_CONSTANTS, 
+  UI_SIZES, 
+  BREAKPOINTS 
+} from '../constants';
 
 const { Header, Sider } = Layout;
 
@@ -34,14 +31,14 @@ const Navbar = () => {
   
   // UI state
   const [collapsed, setCollapsed] = useState(true);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= BREAKPOINTS.MD);
 
   /**
    * Handle window resize events to adjust for mobile/desktop layouts
    */
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth <= BREAKPOINTS.MD);
     };
 
     window.addEventListener('resize', handleResize);
@@ -57,49 +54,26 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const items = [
-    {
-      key: '/',
-      icon: <DashboardOutlined />,
-      label: <Link to="/">Dashboard</Link>,
-    },
-    {
-      key: '/transactions',
-      icon: <TransactionOutlined />,
-      label: <Link to="/transactions">Transactions</Link>,
-    },
-    {
-      key: '/budgets',
-      icon: <DollarOutlined />,
-      label: <Link to="/budgets">Budgets</Link>,
-    },
-    {
-      key: '/goals',
-      icon: <FlagOutlined />,
-      label: <Link to="/goals">Goals</Link>,
-    },
-    {
-      key: '/upload',
-      icon: <UploadOutlined />,
-      label: <Link to="/upload">Upload</Link>,
-    },
-    {
-      key: '/profile',
-      icon: <UserOutlined />,
-      label: <Link to="/profile">Profile</Link>,
-    },
-  ];
+  // Generate navigation items from constants
+  const items = Object.values(ROUTES)
+    .filter(route => route.path !== '/login' && route.path !== '/register')
+    .map(route => ({
+      key: route.path,
+      icon: <route.icon />,
+      label: <Link to={route.path}>{route.name}</Link>,
+    }));
 
+  // Generate user dropdown items from constants
   const userDropdownItems = [
     {
-      key: 'profile',
-      icon: <UserOutlined />,
-      label: <Link to="/profile">Profile</Link>,
+      key: USER_MENU_ITEMS.PROFILE.key,
+      icon: <USER_MENU_ITEMS.PROFILE.icon />,
+      label: <Link to={USER_MENU_ITEMS.PROFILE.path}>{USER_MENU_ITEMS.PROFILE.label}</Link>,
     },
     {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: <span onClick={handleLogout}>Logout</span>,
+      key: USER_MENU_ITEMS.LOGOUT.key,
+      icon: <USER_MENU_ITEMS.LOGOUT.icon />,
+      label: <span onClick={handleLogout}>{USER_MENU_ITEMS.LOGOUT.label}</span>,
     },
   ];
 
@@ -128,7 +102,7 @@ const Navbar = () => {
             fontSize: collapsed ? '14px' : '20px',
             margin: '16px 0'
           }}>
-            {collapsed ? 'SS' : 'SmartSpend'}
+            {collapsed ? APP_CONSTANTS.APP_SHORT_NAME : APP_CONSTANTS.APP_NAME}
           </div>
           <Menu
             theme="dark"
@@ -139,7 +113,7 @@ const Navbar = () => {
           />
         </Sider>
       )}
-      <Layout className="site-layout" style={{ marginLeft: isMobile ? 0 : (collapsed ? 80 : 200) }}>
+      <Layout className="site-layout" style={{ marginLeft: isMobile ? 0 : (collapsed ? UI_SIZES.SIDEBAR_COLLAPSED_WIDTH : UI_SIZES.SIDEBAR_WIDTH) }}>
         <Header
           style={{
             padding: 0,
@@ -152,7 +126,7 @@ const Navbar = () => {
           {isMobile ? (
             <>
               <div className="mobile-logo" style={{ marginLeft: 16, fontSize: '18px', fontWeight: 'bold' }}>
-                SmartSpend
+                {APP_CONSTANTS.APP_NAME}
               </div>
               <Dropdown
                 menu={{

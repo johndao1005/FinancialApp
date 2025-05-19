@@ -13,6 +13,7 @@ import {
   MailOutlined,
   DollarOutlined
 } from '@ant-design/icons';
+import { CURRENCIES, LANGUAGES } from '../../../constants';
 
 const { Option } = Select;
 
@@ -85,13 +86,11 @@ const ProfileForm = ({
               prefix={<DollarOutlined />}
               placeholder="Select currency"
             >
-              <Option value="USD">USD ($)</Option>
-              <Option value="EUR">EUR (€)</Option>
-              <Option value="GBP">GBP (£)</Option>
-              <Option value="JPY">JPY (¥)</Option>
-              <Option value="CAD">CAD (C$)</Option>
-              <Option value="AUD">AUD (A$)</Option>
-              <Option value="NZD">NZD (NZ$)</Option>
+              {CURRENCIES.map(currency => (
+                <Option key={currency.value} value={currency.value}>
+                  {currency.label}
+                </Option>
+              ))}
             </Select>
           </Form.Item>
         </Col>
@@ -102,12 +101,11 @@ const ProfileForm = ({
             rules={[{ required: true, message: 'Please select your language' }]}
           >
             <Select placeholder="Select language">
-              <Option value="en">English</Option>
-              <Option value="es">Spanish</Option>
-              <Option value="fr">French</Option>
-              <Option value="de">German</Option>
-              <Option value="zh">Chinese</Option>
-              <Option value="ja">Japanese</Option>
+              {LANGUAGES.map(language => (
+                <Option key={language.value} value={language.value}>
+                  {language.label}
+                </Option>
+              ))}
             </Select>
           </Form.Item>
         </Col>

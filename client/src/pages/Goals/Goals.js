@@ -171,7 +171,7 @@ const Goals = () => {
       const contributionData = {
         goalId: selectedGoalId,
         amount: values.amount,
-        date: values.date.format(),
+        date: values.date.format('YYYY-MM-DD'),
         notes: values.notes
       };
       
