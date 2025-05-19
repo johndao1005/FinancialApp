@@ -22,11 +22,29 @@ exports.getProfile = async (req, res) => {
 // Update user profile
 exports.updateProfile = async (req, res) => {
   try {
-    const { firstName, lastName, baseCurrency } = req.body;
+    const { firstName, lastName, baseCurrency, settings } = req.body;
+    
+    // Update user data
+    const updateData = {};
+    if (firstName) updateData.firstName = firstName;
+    if (lastName) updateData.lastName = lastName;
+    if (baseCurrency) updateData.baseCurrency = baseCurrency;
+    
+    // Additional settings stored in JSON field if available
+    if (settings) {
+      const user = await User.findByPk(req.user.id);
+      if (user) {
+        const currentSettings = user.settings || {};
+        updateData.settings = JSON.stringify({
+          ...currentSettings,
+          ...settings
+        });
+      }
+    }
     
     // Update user
     const [updated] = await User.update(
-      { firstName, lastName, baseCurrency },
+      updateData,
       { where: { id: req.user.id } }
     );
     

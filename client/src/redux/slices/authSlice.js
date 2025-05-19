@@ -75,6 +75,32 @@ export const loadUser = createAsyncThunk(
   }
 );
 
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (userData, { rejectWithValue }) => {
+    try {
+      // Format the data to match what the server expects
+      const nameArray = userData.name.trim().split(' ');
+      const formattedData = {
+        firstName: nameArray[0] || '',
+        lastName: nameArray.slice(1).join(' ') || '',
+        baseCurrency: userData.currency,
+        settings: {
+          language: userData.language
+        }
+      };
+      
+      console.log('Sending profile update:', formattedData);
+      const response = await axios.put('/api/users/profile', formattedData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to update profile'
+      );
+    }
+  }
+);
+
 // Auth slice
 const authSlice = createSlice({
   name: 'auth',
@@ -137,6 +163,20 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = false;
         state.user = null;
+        state.error = action.payload;
+      })
+      
+      // Update profile
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       });
   }

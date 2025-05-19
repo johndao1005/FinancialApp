@@ -76,6 +76,7 @@ const ProfileForm = ({
               <Option value="JPY">JPY (¥)</Option>
               <Option value="CAD">CAD (C$)</Option>
               <Option value="AUD">AUD (A$)</Option>
+              <Option value="NZD">NZD (NZ$)</Option>
             </Select>
           </Form.Item>
         </Col>

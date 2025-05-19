@@ -10,23 +10,25 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Card, 
-  Typography, 
-  Modal, 
-  Form, 
+import {
+  Card,
+  Typography,
+  Modal,
+  Form,
   Row,
   Col,
-  Space
+  Space,
+  Divider
 } from 'antd';
 import moment from 'moment';
-import { 
-  fetchTransactions, 
+import {
+  fetchTransactions,
   deleteTransaction,
-  updateTransaction 
+  updateTransaction
 } from '../../redux/slices/transactionSlice';
 import { fetchCategories } from '../../redux/slices/categorySlice';
 
+import TopMerchantsChart from '../../components/TopMerchantsChart';
 // Import components
 import TransactionTable from './component/TransactionTable';
 import TransactionFilters from './component/TransactionFilters';
@@ -40,7 +42,7 @@ const Transactions = () => {
   // Redux state selectors
   const { transactions, loading, totalPages, currentPage } = useSelector(state => state.transactions);
   const { categories } = useSelector(state => state.categories);
-  
+
   // Pagination and filtering state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -49,15 +51,15 @@ const Transactions = () => {
     endDate: '',
     category: ''
   });
-  
+
   // For time frame selection for charts
   const [timeFrame, setTimeFrame] = useState('month'); // 'week', 'month', 'year'
-  
+
   // For editing transactions
   const [editMode, setEditMode] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [form] = Form.useForm();
-  
+
   useEffect(() => {
     // Fetch transactions and categories on component mount
     dispatch(fetchTransactions({ page, filters }));
@@ -76,7 +78,7 @@ const Transactions = () => {
     const newFilters = {
       ...filters
     };
-    
+
     if (values.dateRange) {
       newFilters.startDate = values.dateRange[0].format('YYYY-MM-DD');
       newFilters.endDate = values.dateRange[1].format('YYYY-MM-DD');
@@ -84,13 +86,13 @@ const Transactions = () => {
       newFilters.startDate = '';
       newFilters.endDate = '';
     }
-    
+
     if (values.category) {
       newFilters.category = values.category;
     } else {
       newFilters.category = '';
     }
-    
+
     setFilters(newFilters);
     setPage(1); // Reset to first page
     dispatch(fetchTransactions({ page: 1, filters: newFilters }));
@@ -151,13 +153,13 @@ const Transactions = () => {
    */
   const handleEditChange = (changedValues, allValues) => {
     // If isRecurring changed to false, remove the recurring fields
-    let updatedTransaction = {...editingTransaction};
-    
+    let updatedTransaction = { ...editingTransaction };
+
     // Update all values
     Object.keys(allValues).forEach(key => {
       updatedTransaction[key] = allValues[key];
     });
-    
+
     // Handle isRecurring toggle
     if ('isRecurring' in changedValues) {
       if (!changedValues.isRecurring) {
@@ -166,7 +168,7 @@ const Transactions = () => {
         updatedTransaction.recurringEndDate = null;
       }
     }
-    
+
     setEditingTransaction(updatedTransaction);
   };
 
@@ -179,22 +181,22 @@ const Transactions = () => {
    */
   const handleEditSubmit = () => {
     // Format recurring end date if it exists
-    let transactionData = {...editingTransaction};
-    
+    let transactionData = { ...editingTransaction };
+
     // Format the dates if they exist
     if (transactionData.recurringEndDate && typeof transactionData.recurringEndDate !== 'string') {
       transactionData.recurringEndDate = transactionData.recurringEndDate.format('YYYY-MM-DD');
     }
-    
+
     if (transactionData.date && typeof transactionData.date !== 'string') {
       transactionData.date = transactionData.date.format('YYYY-MM-DD');
     }
-    
-    dispatch(updateTransaction({ 
-      id: editingTransaction.id, 
-      transactionData 
+
+    dispatch(updateTransaction({
+      id: editingTransaction.id,
+      transactionData
     }));
-    
+
     setEditMode(false);
     setEditingTransaction(null);
   };
@@ -206,10 +208,21 @@ const Transactions = () => {
    */
   const handleTimeFrameChange = (value) => {
     setTimeFrame(value);
-    
+
     // Could update transaction filters based on the time frame
     // to show relevant transaction data for the selected period
   };
+
+  // Get time frame label
+  const getTimeFrameLabel = () => {
+    switch (timeFrame) {
+      case 'week': return 'This Week';
+      case 'month': return 'This Month';
+      case 'year': return 'This Year';
+      default: return 'Current Period';
+    }
+  };
+
 
   return (
     <div className="transactions-page">
@@ -220,20 +233,20 @@ const Transactions = () => {
           </Card>
         </Col>
       </Row>
-      
+
       <Row gutter={[0, 16]}>
         <Col span={24}>
-          <TransactionStats 
+          <TransactionStats
             transactions={transactions}
             timeFrame={timeFrame}
             onTimeFrameChange={handleTimeFrameChange}
           />
         </Col>
       </Row>
-      
+
       <Row gutter={[0, 16]}>
         <Col span={24}>
-          <TransactionFilters 
+          <TransactionFilters
             form={form}
             categories={categories}
             onFilterChange={handleFilterChange}
@@ -241,11 +254,11 @@ const Transactions = () => {
           />
         </Col>
       </Row>
-      
+
       <Row gutter={[0, 16]}>
         <Col span={24}>
           <Card>
-            <TransactionTable 
+            <TransactionTable
               transactions={transactions}
               loading={loading}
               totalPages={totalPages}
@@ -257,7 +270,18 @@ const Transactions = () => {
           </Card>
         </Col>
       </Row>
-      
+
+      <Divider />
+
+      <Row  gutter={[0, 16]}>
+        <Col span={24}>
+          <TopMerchantsChart
+            transactions={transactions}
+            title={`Top Merchants (${getTimeFrameLabel()})`}
+          />
+        </Col>
+      </Row>
+
       {/* Transaction Edit Modal */}
       <Modal
         title="Edit Transaction"
@@ -269,7 +293,7 @@ const Transactions = () => {
         footer={null}
         width={700}
       >
-        <TransactionEditForm 
+        <TransactionEditForm
           transaction={editingTransaction}
           categories={categories}
           onChange={handleEditChange}

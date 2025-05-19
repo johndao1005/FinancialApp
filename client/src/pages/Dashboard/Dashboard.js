@@ -17,7 +17,8 @@ import {
   Col, 
   Typography, 
   Spin, 
-  Divider
+  Divider,
+  Tag
 } from 'antd';
 import { fetchTransactions } from '../../redux/slices/transactionSlice';
 import QuickTransactionEntry from '../../components/QuickTransactionEntry';

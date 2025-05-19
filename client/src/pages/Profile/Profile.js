@@ -17,6 +17,7 @@ import {
   LockOutlined, 
   SettingOutlined
 } from '@ant-design/icons';
+import { updateProfile, loadUser } from '../../redux/slices/authSlice';
 
 // Import components
 import ProfileForm from './component/ProfileForm';
@@ -27,28 +28,34 @@ const { Title } = Typography;
 const { TabPane } = Tabs;
 
 const Profile = () => {
-  const { user } = useSelector(state => state.auth);
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { user, loading, error: authError } = useSelector(state => state.auth);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
   
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
+  
   const handleProfileUpdate = async (values) => {
-    setLoading(true);
     setSuccess(null);
     setError(null);
     
     try {
-      await axios.put('/api/users/profile', values);
+      await dispatch(updateProfile(values)).unwrap();
       setSuccess('Profile updated successfully!');
       message.success('Profile updated successfully!');
+      
+      // Reload user data to get fresh data
+      dispatch(loadUser());
     } catch (error) {
       console.error('Error updating profile:', error);
       setError('Failed to update profile. Please try again.');
       message.error('Failed to update profile. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
   
@@ -87,9 +94,9 @@ const Profile = () => {
   
   // Initial values for profile form
   const initialProfileValues = {
-    name: user?.name || '',
+    name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '',
     email: user?.email || '',
-    currency: user?.settings?.currency || 'USD',
+    currency: user?.baseCurrency || 'USD',
     language: user?.settings?.language || 'en',
   };
   

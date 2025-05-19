@@ -11,7 +11,6 @@ import {
   ArrowUpOutlined,
   ArrowDownOutlined
 } from '@ant-design/icons';
-import TopMerchantsChart from '../../../components/TopMerchantsChart';
 
 const TransactionStats = ({ 
   transactions,
@@ -29,15 +28,6 @@ const TransactionStats = ({
     
   const balance = income + expenses;
 
-  // Get time frame label
-  const getTimeFrameLabel = () => {
-    switch(timeFrame) {
-      case 'week': return 'This Week';
-      case 'month': return 'This Month';
-      case 'year': return 'This Year';
-      default: return 'Current Period';
-    }
-  };
 
   return (
     <div className="transaction-stats">
@@ -95,14 +85,7 @@ const TransactionStats = ({
         
         <Divider />
         
-        <Row>
-          <Col span={24}>
-            <TopMerchantsChart 
-              transactions={transactions} 
-              title={`Top Merchants (${getTimeFrameLabel()})`}
-            />
-          </Col>
-        </Row>
+       
       </Card>
     </div>
   );
