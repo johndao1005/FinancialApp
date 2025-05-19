@@ -65,7 +65,12 @@ export const loadUser = createAsyncThunk(
           Authorization: `Bearer ${token}`
         }
       });
-      return response.data;
+      
+      // Add a formatted name field for easier usage in UI
+      const user = response.data;
+      user.name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      
+      return user;
     } catch (error) {
       localStorage.removeItem('token');
       return rejectWithValue(
@@ -80,10 +85,9 @@ export const updateProfile = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       // Format the data to match what the server expects
-      const nameArray = userData.name.trim().split(' ');
       const formattedData = {
-        firstName: nameArray[0] || '',
-        lastName: nameArray.slice(1).join(' ') || '',
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         baseCurrency: userData.currency,
         settings: {
           language: userData.language
@@ -92,7 +96,12 @@ export const updateProfile = createAsyncThunk(
       
       console.log('Sending profile update:', formattedData);
       const response = await axios.put('/api/users/profile', formattedData);
-      return response.data;
+      
+      // Add a formatted name field to the response so it's easier to use in the UI
+      const user = response.data;
+      user.name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      
+      return user;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to update profile'

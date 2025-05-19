@@ -30,15 +30,17 @@ exports.updateProfile = async (req, res) => {
     if (lastName) updateData.lastName = lastName;
     if (baseCurrency) updateData.baseCurrency = baseCurrency;
     
-    // Additional settings stored in JSON field if available
+    // Handle settings - get current user to access existing settings
     if (settings) {
       const user = await User.findByPk(req.user.id);
       if (user) {
+        // Get current settings (could be null/undefined)
         const currentSettings = user.settings || {};
-        updateData.settings = JSON.stringify({
+        // Merge with new settings
+        updateData.settings = {
           ...currentSettings,
           ...settings
-        });
+        };
       }
     }
     

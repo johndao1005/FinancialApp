@@ -31,17 +31,32 @@ const ProfileForm = ({
       <Row gutter={16}>
         <Col span={12}>
           <Form.Item
-            name="name"
-            label="Name"
-            rules={[{ required: true, message: 'Please enter your name' }]}
+            name="firstName"
+            label="First Name"
+            rules={[{ required: true, message: 'Please enter your first name' }]}
           >
             <Input 
               prefix={<UserOutlined />} 
-              placeholder="Your name" 
+              placeholder="Your first name" 
             />
           </Form.Item>
         </Col>
         <Col span={12}>
+          <Form.Item
+            name="lastName"
+            label="Last Name"
+            rules={[{ required: true, message: 'Please enter your last name' }]}
+          >
+            <Input 
+              prefix={<UserOutlined />} 
+              placeholder="Your last name" 
+            />
+          </Form.Item>
+        </Col>
+      </Row>
+      
+      <Row gutter={16}>
+        <Col span={24}>
           <Form.Item
             name="email"
             label="Email"

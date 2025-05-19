@@ -65,6 +65,17 @@ module.exports = (sequelize, DataTypes) => {
     isPremium: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
+    },
+    // User settings stored as JSON string
+    settings: {
+      type: DataTypes.TEXT,
+      get() {
+        const value = this.getDataValue('settings');
+        return value ? JSON.parse(value) : {};
+      },
+      set(value) {
+        this.setDataValue('settings', JSON.stringify(value));
+      }
     }
   }, {
     timestamps: true  // Enables createdAt and updatedAt fields

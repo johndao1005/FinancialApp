@@ -94,7 +94,8 @@ const Profile = () => {
   
   // Initial values for profile form
   const initialProfileValues = {
-    name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
     email: user?.email || '',
     currency: user?.baseCurrency || 'USD',
     language: user?.settings?.language || 'en',

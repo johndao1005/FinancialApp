@@ -58,7 +58,6 @@ function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/transactions" element={<Transactions />} />
                     <Route path="/upload" element={<UploadStatement />} />
-                    <Route path="/profile" element={<Profile />} />
                     <Route path="/budgets" element={<Budgets />} />
                     <Route path="/goals" element={<Goals />} />
                   </Route>
