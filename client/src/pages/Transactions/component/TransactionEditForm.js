@@ -12,6 +12,10 @@ import {
   Divider
 } from 'antd';
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+// Extend dayjs with needed plugins
+dayjs.extend(customParseFormat);
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -46,8 +50,7 @@ const TransactionEditForm = ({
             <Input placeholder="Transaction description" />
           </Form.Item>
         </Col>
-        <Col span={8}>
-          <Form.Item
+        <Col span={8}>          <Form.Item
             name="date"
             label="Date"
             rules={[{ required: true, message: 'Please select a date' }]}
@@ -55,6 +58,7 @@ const TransactionEditForm = ({
             <DatePicker 
               style={{ width: '100%' }}
               format="YYYY-MM-DD"
+              inputReadOnly={true}
             />
           </Form.Item>
         </Col>
