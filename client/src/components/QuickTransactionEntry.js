@@ -28,7 +28,12 @@ import {
 } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { createTransaction } from '../redux/slices/transactionSlice';
-import moment from 'moment';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+// Extend dayjs with needed plugins
+dayjs.extend(customParseFormat);
+
 
 const { Option } = Select;
 
@@ -146,7 +151,7 @@ const QuickTransactionEntry = ({ onSuccess }) => {
           layout="vertical"
           onFinish={handleSubmit}
           initialValues={{
-            date: moment(),
+            date: dayjs(),
             amount: '',
             isExpense: true,
             category: 'Uncategorized',
