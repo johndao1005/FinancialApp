@@ -16,6 +16,7 @@
  * - transactionConstants.js: Transaction types, status values, sorting options
  * - budgetConstants.js: Budget periods, types, status values
  * - goalConstants.js: Financial goal types, status values, time frames
+ * - assetConstants.js: Asset utility functions, type names, shared components
  */
 
 // Export all constants
@@ -26,3 +27,4 @@ export * from './themeConstants';
 export * from './transactionConstants';
 export * from './budgetConstants';
 export * from './goalConstants';
+export * from './assetConstants';

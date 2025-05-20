@@ -35,7 +35,8 @@ const Profile = lazy(() => import('./pages/Profile/Profile'));
 const Budgets = lazy(() => import('./pages/Budgets/Budgets'));
 const Goals = lazy(() => import('./pages/Goals/Goals'));
 const Income = lazy(() => import('./pages/Income/Income'));
-const Assets = lazy(() => import('./pages/Assets'));
+const AssetsList = lazy(() => import('./pages/AssetsList'));
+const AssetDetail = lazy(() => import('./pages/AssetDetail'));
 
 // Loading component for suspense fallback
 const LoadingFallback = () => (
@@ -74,11 +75,10 @@ function App() {
                 <AssetNotifications />
                 <Suspense fallback={<LoadingFallback />}>
                   <Routes>
-                    {/* Protected Routes - Only accessible when logged in */}
-                    <Route element={<PrivateRoute />}>                      <Route path={ROUTES.DASHBOARD.path} element={<Dashboard />} />                      <Route path={ROUTES.TRANSACTIONS.path} element={<Transactions />} />
+                    {/* Protected Routes - Only accessible when logged in */}                    <Route element={<PrivateRoute />}>                      <Route path={ROUTES.DASHBOARD.path} element={<Dashboard />} />                      <Route path={ROUTES.TRANSACTIONS.path} element={<Transactions />} />
                       <Route path={ROUTES.INCOME.path} element={<Income />} />
-                      <Route path={ROUTES.ASSETS.path} element={<Assets />} />
-                      <Route path={`${ROUTES.ASSETS.path}/:assetId`} element={<Assets />} />
+                      <Route path={ROUTES.ASSETS.path} element={<AssetsList />} />
+                      <Route path={`${ROUTES.ASSETS.path}/:assetId`} element={<AssetDetail />} />
                       <Route path={ROUTES.UPLOAD.path} element={<UploadStatement />} />
                       <Route path={ROUTES.PROFILE.path} element={<Profile />} />
                       <Route path={ROUTES.BUDGETS.path} element={<Budgets />} />
