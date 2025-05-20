@@ -13,7 +13,7 @@ import AssetList from '../../../components/Assets/AssetList';
 import NetWorthChart from '../../../components/Assets/NetWorthChart';
 import AssetAllocationChart from '../../../components/Assets/AssetAllocationChart';
 import PortfolioPerformance from '../../../components/Assets/PortfolioPerformance';
-import AssetsList from '../../Assets/component/AssetsList';
+import AssetsList from './AssetsList';
 
 const AssetsTabs = ({
   tabValue,

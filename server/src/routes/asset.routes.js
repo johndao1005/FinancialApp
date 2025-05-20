@@ -9,7 +9,7 @@
 const express = require('express');
 const router = express.Router();
 const assetController = require('../controllers/asset.controller');
-const { authMiddleware } = require('../middlewares/auth.middleware');
+const authMiddleware = require('../middlewares/auth.middleware');
 const { validateAsset } = require('../middlewares/asset.validation');
 
 // Apply authentication middleware to all asset routes

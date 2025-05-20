@@ -43,7 +43,6 @@ import TransactionTable from './component/TransactionTable';
 import TransactionFilters from './component/TransactionFilters';
 import TransactionEditForm from './component/TransactionEditForm';
 import TransactionStats from './component/TransactionStats';
-import CategoryChange from '../../components/CategoryChange';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import OnboardingTooltip from '../../components/OnboardingTooltip';
 
@@ -416,17 +415,6 @@ const Transactions = () => {
           }}
           onSubmit={handleEditSubmit}
         />      </Modal>
-
-      {/* Category Change Modal */}
-      <CategoryChange
-        visible={categoryChangeVisible}
-        transaction={selectedTransaction}
-        categories={categories}
-        onCancel={() => {
-          setCategoryChangeVisible(false);
-          setSelectedTransaction(null);        }}
-        onSave={handleCategorySave}
-      />
       
       {/* Generated Rules Modal */}
       <Modal

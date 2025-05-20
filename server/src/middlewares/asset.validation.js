@@ -10,6 +10,8 @@
  * @validates initialValue - Required, positive number
  * @validates acquisitionDate - Required, valid date
  */
+const { body } = require('express-validator');
+
 exports.validateAsset = [
   // Asset name validation
   body('name')
