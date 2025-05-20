@@ -9,7 +9,7 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 5001; // Changed from 5000 to 5001
+const PORT = process.env.PORT || 5000; // Using environment variable or default to 5000
 
 // Middleware
 app.use(cors({

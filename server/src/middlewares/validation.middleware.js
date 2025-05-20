@@ -56,6 +56,7 @@ exports.validateRegistration = [
   // Error handler middleware
   (req, res, next) => {
     const errors = validationResult(req);
+    console.log('Validation errors:', errors.array());
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }

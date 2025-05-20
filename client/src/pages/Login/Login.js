@@ -23,9 +23,9 @@ const Login = () => {
       dispatch(clearError());
     };
   }, [isAuthenticated, navigate, dispatch]);
-
   const onFinish = (values) => {
-    dispatch(loginUser(values));
+    const { email, password } = values;
+    dispatch(loginUser({ email, password }));
   };
 
   return (

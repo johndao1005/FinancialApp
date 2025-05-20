@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Form, Input, Button, Space, Typography } from 'antd';
+import { Form, Input, Button, Space, Typography, Row, Col } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
@@ -12,16 +12,32 @@ const RegisterForm = ({ loading, onFinish }) => {
       className="register-form"
       onFinish={onFinish}
     >
-      <Form.Item
-        name="name"
-        rules={[{ required: true, message: 'Please enter your name' }]}
-      >
-        <Input 
-          prefix={<UserOutlined />} 
-          placeholder="Full Name" 
-          size="large" 
-        />
-      </Form.Item>
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item
+            name="firstName"
+            rules={[{ required: true, message: 'Please enter your first name' }]}
+          >
+            <Input 
+              prefix={<UserOutlined />} 
+              placeholder="First Name" 
+              size="large" 
+            />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            name="lastName"
+            rules={[{ required: true, message: 'Please enter your last name' }]}
+          >
+            <Input 
+              prefix={<UserOutlined />} 
+              placeholder="Last Name" 
+              size="large" 
+            />
+          </Form.Item>
+        </Col>
+      </Row>
       
       <Form.Item
         name="email"

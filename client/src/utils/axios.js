@@ -15,7 +15,7 @@ import axios from 'axios';
 
 // Set the base URL for all axios requests
 // Change this to match your backend URL
-axios.defaults.baseURL = 'http://localhost:5001';
+axios.defaults.baseURL = 'http://localhost:5000';
 
 /**
  * Request Interceptor

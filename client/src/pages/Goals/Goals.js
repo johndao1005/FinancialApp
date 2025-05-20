@@ -164,18 +164,22 @@ const Goals = () => {
       message.error('Failed to delete goal');
     }
   };
-  
-  const handleContributionSubmit = async () => {
+    const handleContributionSubmit = async () => {
     try {
       const values = await contributionForm.validateFields();
+      
+      // Make sure amount is a number and properly formatted
+      const amount = typeof values.amount === 'string' 
+        ? parseFloat(values.amount.replace(/[^\d.-]/g, '')) 
+        : values.amount;
+        
       const contributionData = {
-        goalId: selectedGoalId,
-        amount: values.amount,
+        amount,
         date: values.date.format('YYYY-MM-DD'),
         notes: values.notes
       };
       
-      await dispatch(addContribution(contributionData)).unwrap();
+      await dispatch(addContribution({ id: selectedGoalId, contributionData })).unwrap();
       message.success('Contribution added successfully');
       setContributionModalVisible(false);
       
@@ -183,10 +187,17 @@ const Goals = () => {
       if (detailModalVisible) {
         dispatch(fetchGoal(selectedGoalId));
       }
-      
-      contributionForm.resetFields();
+        contributionForm.resetFields();
     } catch (error) {
-      console.error('Form validation error:', error);
+      console.error('Contribution error:', error);
+      // Display appropriate error message
+      if (typeof error === 'string') {
+        message.error(error);
+      } else if (error.message) {
+        message.error(error.message);
+      } else {
+        message.error('Failed to add contribution. Please check your input and try again.');
+      }
     }
   };
   

@@ -84,7 +84,18 @@ export const addContribution = createAsyncThunk(
   'goal/addContribution',
   async ({ id, contributionData }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`/api/goals/${id}/contributions`, contributionData);
+      // Ensure amount is a valid number
+      const payload = {
+        ...contributionData,
+        amount: parseFloat(contributionData.amount)
+      };
+      
+      // Validate the amount before sending
+      if (isNaN(payload.amount) || payload.amount <= 0) {
+        return rejectWithValue('Please enter a valid contribution amount greater than zero');
+      }
+      
+      const response = await axios.post(`/api/goals/${id}/contributions`, payload);
       return { goalId: id, contribution: response.data };
     } catch (error) {
       return rejectWithValue(

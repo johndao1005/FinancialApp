@@ -20,11 +20,17 @@ const ContributionForm = ({ form, onFinish, onCancel }) => {
       onFinish={onFinish}
     >
       <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item
+        <Col span={12}>          <Form.Item
             name="amount"
             label="Contribution Amount"
-            rules={[{ required: true, message: 'Please enter an amount' }]}
+            rules={[
+              { required: true, message: 'Please enter an amount' },
+              { 
+                type: 'number',
+                min: 0.01, 
+                message: 'Amount must be greater than zero' 
+              }
+            ]}
           >
             <InputNumber
               style={{ width: '100%' }}
@@ -32,7 +38,8 @@ const ContributionForm = ({ form, onFinish, onCancel }) => {
               parser={value => value.replace(/\$\s?|(,*)/g, '')}
               placeholder="0.00"
               min={0.01}
-              step={1}
+              step={0.01}
+              precision={2}
             />
           </Form.Item>
         </Col>

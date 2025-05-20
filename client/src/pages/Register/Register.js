@@ -22,11 +22,9 @@ const Register = () => {
     return () => {
       dispatch(clearError());
     };
-  }, [isAuthenticated, navigate, dispatch]);
-
-  const onFinish = (values) => {
-    const { name, email, password } = values;
-    dispatch(registerUser({ name, email, password }));
+  }, [isAuthenticated, navigate, dispatch]);  const onFinish = (values) => {
+    const { firstName, lastName, email, password } = values;
+    dispatch(registerUser({ firstName, lastName, email, password }));
   };
 
   return (

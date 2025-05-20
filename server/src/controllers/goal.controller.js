@@ -371,13 +371,13 @@ exports.deleteGoal = async (req, res) => {
 
 // Add a contribution to a goal
 exports.addContribution = async (req, res) => {
-  try {
-    const userId = req.user.id;
+  try {    const userId = req.user.id;
     const goalId = req.params.id;
     const { amount, date, description, transactionId } = req.body;
     
     // Validate input
-    if (!amount || parseFloat(amount) <= 0) {
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
       return res.status(400).json({ message: 'Please provide a valid contribution amount' });
     }
     
@@ -406,10 +406,9 @@ exports.addContribution = async (req, res) => {
         return res.status(404).json({ message: 'Transaction not found' });
       }
     }
-    
-    // Create the contribution
+      // Create the contribution
     const contribution = await GoalContribution.create({
-      amount,
+      amount: parsedAmount,
       date: date || new Date(),
       userId,
       goalId,
@@ -418,7 +417,7 @@ exports.addContribution = async (req, res) => {
     });
     
     // Update the goal's current amount
-    const newCurrentAmount = parseFloat(goal.currentAmount) + parseFloat(amount);
+    const newCurrentAmount = parseFloat(goal.currentAmount) + parsedAmount;
     await goal.update({ 
       currentAmount: newCurrentAmount,
       status: newCurrentAmount >= parseFloat(goal.targetAmount) ? 'completed' : goal.status
