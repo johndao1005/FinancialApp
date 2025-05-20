@@ -36,6 +36,8 @@ import {
   Checkbox,
   InputAdornment
 } from '@mui/material';
+import ValuationChart from '../../components/Assets/ValuationChart';
+import ValuationUpdateDialog from '../../components/Assets/ValuationUpdateDialog';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -128,8 +130,10 @@ const AssetDetail = () => {
   // Local state
   const [tabValue, setTabValue] = useState(0);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
-  const [historyPeriod, setHistoryPeriod] = useState('all');
+  const [valuationDialogOpen, setValuationDialogOpen] = useState(false);
+  const [historyPeriod, setHistoryPeriod] = useState('all'); // '1m', '3m', '6m', '1y', 'all'
   
   // Redux state
   const { 
@@ -141,8 +145,7 @@ const AssetDetail = () => {
     historyLoading,
     error 
   } = useSelector(state => state.assets);
-  
-  // Form state for edit asset dialog
+    // Form state for edit asset dialog
   const [editAssetData, setEditAssetData] = useState({
     name: '',
     currentValue: '',
@@ -754,7 +757,7 @@ const AssetDetail = () => {
                           ({percentageChange >= 0 ? '+' : ''}
                           {percentageChange.toFixed(2)}%)
                         </Typography>
-                      </Box>
+                    </Box>
                     </Grid>
                     
                     <Grid item xs={6}>
@@ -969,16 +972,27 @@ const AssetDetail = () => {
             </CardContent>
           </Card>
         </TabPanel>
-          {/* Value History Tab */}
-        <TabPanel value={tabValue} index={2}>
+          {/* Value History Tab */}        <TabPanel value={tabValue} index={2}>
           {historyLoading ? (
             <Box display="flex" justifyContent="center" my={4}>
               <CircularProgress />
             </Box>
           ) : (
             <>
+              <Box display="flex" justifyContent="flex-end" mb={2}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<AttachMoneyIcon />}
+                  onClick={() => setValuationDialogOpen(true)}
+                  disabled={!currentAsset.isActive}
+                >
+                  Update Valuation
+                </Button>
+              </Box>
+              
               <ValuationChart 
-                asset={asset} 
+                asset={currentAsset} 
                 transactions={assetHistory?.valueHistory || []} 
                 projectionYears={5}
                 showProjection={true}
@@ -1039,10 +1053,9 @@ const AssetDetail = () => {
                   </Grid>
                 </Box>
               )}
-            </CardContent>
-          </Card>
-        </TabPanel>
-      </Paper>
+            </>
+          )}
+        </TabPanel>      </Paper>
       
       {/* Edit Asset Dialog */}
       <Dialog
@@ -1273,12 +1286,18 @@ const AssetDetail = () => {
             variant="contained" 
             color="primary"
             onClick={handleAddTransaction}
-            disabled={!transactionData.amount}
-          >
+            disabled={!transactionData.amount}          >
             Add Transaction
           </Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Valuation Update Dialog */}
+      <ValuationUpdateDialog 
+        open={valuationDialogOpen}
+        onClose={() => setValuationDialogOpen(false)}
+        asset={currentAsset}
+      />
     </Container>
   );
 };

@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { createAssetTransaction } from '../../redux/slices/assetSlice';
+import { createAssetTransaction, updateAsset } from '../../redux/slices/assetSlice';
 import {
   Dialog,
   DialogTitle,
@@ -236,8 +236,7 @@ const ValuationUpdateDialog = ({ open, onClose, asset }) => {
       };
       
       await dispatch(createAssetTransaction(transactionData));
-      
-      // Update asset settings
+        // Update asset settings
       const assetUpdateData = {
         id: asset.id,
         currentValue: parseFloat(valuationData.currentValue),
@@ -255,8 +254,8 @@ const ValuationUpdateDialog = ({ open, onClose, asset }) => {
           valuationData.nextValuationDate.toISOString() : null
       };
       
-      // TODO: Call redux action to update asset
-      // await dispatch(updateAsset(assetUpdateData));
+      // Call redux action to update asset
+      await dispatch(updateAsset({ assetId: asset.id, assetData: assetUpdateData }));
       
       // Close dialog
       onClose();
