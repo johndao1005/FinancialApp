@@ -21,7 +21,9 @@ import {
   Tag
 } from 'antd';
 import { fetchTransactions } from '../../redux/slices/transactionSlice';
+import { fetchAssets, fetchNetWorth } from '../../redux/slices/assetSlice';
 import QuickTransactionEntry from '../../components/QuickTransactionEntry';
+import AssetSummary from '../../components/Assets/AssetSummary';
 
 // Import component modules
 import SummaryCards from './component/SummaryCards';
@@ -35,6 +37,7 @@ const { Title } = Typography;
 const Dashboard = () => {
   const dispatch = useDispatch();
   const { transactions, loading } = useSelector(state => state.transactions);
+  const { assets, netWorth, loading: assetLoading } = useSelector(state => state.assets);
   
   // State for chart data
   const [monthlyData, setMonthlyData] = useState([]);
@@ -44,10 +47,13 @@ const Dashboard = () => {
 
   // Colors for charts
   const COLORS = ['#1677ff', '#52c41a', '#faad14', '#f5222d', '#722ed1', '#13c2c2', '#fa8c16'];
-
   useEffect(() => {
     // Fetch transactions on component mount
     dispatch(fetchTransactions({ limit: 100 })); // Increase limit to get more data for filtering
+    
+    // Fetch asset data for the dashboard
+    dispatch(fetchAssets());
+    dispatch(fetchNetWorth());
   }, [dispatch]);
 
   useEffect(() => {
@@ -294,7 +300,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
   return (
     <div style={{ padding: '24px' }}>
       {/* Header with Title and Quick Transaction Entry */}
@@ -328,7 +333,7 @@ const Dashboard = () => {
       
       <Divider />
       
-      {/* Charts */}
+      {/* Charts and Asset Summary */}
       <Row gutter={[16, 16]}>
         {/* Monthly Income vs Expenses Line Chart */}
         <Col xs={24} lg={12}>
@@ -338,6 +343,15 @@ const Dashboard = () => {
         {/* Spending by Category Pie Chart */}
         <Col xs={24} lg={12}>
           <CategoryPieChart data={categoryData} colors={COLORS} />
+        </Col>
+        
+        {/* Asset Summary */}
+        <Col xs={24} lg={12}>
+          <AssetSummary 
+            netWorth={netWorth?.current || 0} 
+            assets={assets} 
+            loading={assetLoading} 
+          />
         </Col>
       </Row>
       

@@ -6,6 +6,7 @@ import budgetReducer from './slices/budgetSlice';
 import goalReducer from './slices/goalSlice';
 import categoryOverrideReducer from './slices/categoryOverrideSlice';
 import incomePredictionReducer from './slices/incomePredictionSlice';
+import assetReducer from './slices/assetSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     budgets: budgetReducer,
     goals: goalReducer,
     categoryOverrides: categoryOverrideReducer,
-    incomePrediction: incomePredictionReducer
+    incomePrediction: incomePredictionReducer,
+    assets: assetReducer
   }
 });
