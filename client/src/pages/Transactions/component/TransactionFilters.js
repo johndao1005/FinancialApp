@@ -8,12 +8,18 @@ import {
   Row,
   Col,
   Card,
-  Typography
+  Typography,
+  Divider,
+  Tooltip,
+  Dropdown
 } from 'antd';
 import { 
   SearchOutlined,
   FilterOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  TagsOutlined,
+  ThunderboltOutlined,
+  DownOutlined
 } from '@ant-design/icons';
 
 const { Title } = Typography;
@@ -24,13 +30,62 @@ const TransactionFilters = ({
   form,
   categories,
   onFilterChange,
-  onReset
+  onReset,
+  onApplyRules,
+  onGenerateRules,
+  applyingRules,
+  generatingRules
 }) => {
+  // Rule generation menu items
+  const ruleItems = [
+    {
+      key: 'merchants',
+      label: 'Merchant Name Patterns',
+    },
+    {
+      key: 'amounts',
+      label: 'Recurring Amount Patterns',
+    },
+    {
+      key: 'both',
+      label: 'Both Patterns',
+    },
+  ];
+
   return (
     <Card className="filter-card">
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
           <Title level={5}>Filter Transactions</Title>
+        </Col>
+        
+        <Col>
+          <Space>
+            <Tooltip title="Apply category rules to all transactions">
+              <Button
+                icon={<TagsOutlined />}
+                loading={applyingRules}
+                onClick={onApplyRules}
+                className="apply-rules-btn"
+              >
+                Apply Rules
+              </Button>
+            </Tooltip>
+            
+            <Dropdown
+              menu={{
+                items: ruleItems,
+                onClick: ({ key }) => onGenerateRules(key)
+              }}
+            >
+              <Button 
+                icon={<ThunderboltOutlined />}
+                loading={generatingRules}
+              >
+                Auto-Generate Rules <DownOutlined />
+              </Button>
+            </Dropdown>
+          </Space>
         </Col>
       </Row>
       

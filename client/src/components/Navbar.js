@@ -6,11 +6,12 @@
  * 2. Responsive design that adapts to mobile and desktop
  * 3. User profile dropdown with logout functionality
  * 4. Visual indication of the current active page
+ * 5. Quick transaction entry button for adding transactions from anywhere
  */
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Layout, Menu, Button, Avatar, Dropdown } from 'antd';
+import { Layout, Menu, Button, Avatar, Dropdown, Space } from 'antd';
 import { MenuFoldOutlined, UserOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { logout } from '../redux/slices/authSlice';
 import { 
@@ -20,6 +21,7 @@ import {
   UI_SIZES, 
   BREAKPOINTS 
 } from '../constants';
+import QuickTransactionEntry from './QuickTransactionEntry';
 
 const { Header, Sider } = Layout;
 
@@ -52,6 +54,14 @@ const Navbar = () => {
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
+  };
+
+  /**
+   * Handle successful transaction creation
+   * Navigates to transactions page to show the newly added transaction
+   */
+  const handleTransactionSuccess = () => {
+    navigate('/transactions');
   };
 
   // Generate navigation items from constants
@@ -98,7 +108,7 @@ const Navbar = () => {
             display: 'flex', 
             justifyContent: 'center', 
             alignItems: 'center', 
-            color: 'white', 
+            color: 'white',
             fontSize: collapsed ? '14px' : '20px',
             margin: '16px 0'
           }}>
@@ -128,14 +138,17 @@ const Navbar = () => {
               <div className="mobile-logo" style={{ marginLeft: 16, fontSize: '18px', fontWeight: 'bold' }}>
                 {APP_CONSTANTS.APP_NAME}
               </div>
-              <Dropdown
-                menu={{
-                  items: [...items, ...userDropdownItems],
-                }}
-                trigger={['click']}
-              >
-                <Button type="text" icon={<MenuUnfoldOutlined />} style={{ marginRight: 16 }} />
-              </Dropdown>
+              <Space>
+                <QuickTransactionEntry onSuccess={handleTransactionSuccess} />
+                <Dropdown
+                  menu={{
+                    items: [...items, ...userDropdownItems],
+                  }}
+                  trigger={['click']}
+                >
+                  <Button type="text" icon={<MenuUnfoldOutlined />} style={{ marginRight: 16 }} />
+                </Dropdown>
+              </Space>
             </>
           ) : (
             <>
@@ -145,14 +158,15 @@ const Navbar = () => {
                 onClick={() => setCollapsed(!collapsed)}
                 style={{ fontSize: '16px', width: 64, height: 64 }}
               />
-              <div style={{ marginRight: 24 }}>
+              <Space style={{ marginRight: 24 }}>
+                <QuickTransactionEntry onSuccess={handleTransactionSuccess} />
                 <Dropdown menu={{ items: userDropdownItems }} placement="bottomRight">
                   <Avatar 
                     icon={<UserOutlined />} 
                     style={{ backgroundColor: '#1677ff', cursor: 'pointer' }}
                   />
                 </Dropdown>
-              </div>
+              </Space>
             </>
           )}
         </Header>

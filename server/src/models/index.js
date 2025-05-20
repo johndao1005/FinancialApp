@@ -18,6 +18,8 @@ const Category = require('./category.model')(sequelize, DataTypes);
 const Budget = require('./budget.model')(sequelize, DataTypes);
 const Goal = require('./goal.model')(sequelize, DataTypes);
 const GoalContribution = require('./goalContribution.model')(sequelize, DataTypes);
+const UserCategoryOverride = require('./userCategoryOverride.model')(sequelize, DataTypes);
+const IncomePrediction = require('./incomePrediction.model')(sequelize, DataTypes);
 
 // Define relationships
 User.hasMany(Transaction, { foreignKey: 'userId', as: 'transactions' });
@@ -58,6 +60,17 @@ GoalContribution.belongsTo(Goal, { foreignKey: 'goalId', as: 'goal' });
 Transaction.hasMany(GoalContribution, { foreignKey: 'transactionId', as: 'goalContributions' });
 GoalContribution.belongsTo(Transaction, { foreignKey: 'transactionId', as: 'transaction' });
 
+// User Category Override relationships
+User.hasMany(UserCategoryOverride, { foreignKey: 'userId', as: 'categoryOverrides' });
+UserCategoryOverride.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+Category.hasMany(UserCategoryOverride, { foreignKey: 'categoryId', as: 'categoryOverrides' });
+UserCategoryOverride.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
+
+// Income Prediction relationships
+User.hasMany(IncomePrediction, { foreignKey: 'userId', as: 'incomePredictions' });
+IncomePrediction.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 // Export models and sequelize instance
 module.exports = {
   sequelize,
@@ -66,5 +79,7 @@ module.exports = {
   Category,
   Budget,
   Goal,
-  GoalContribution
+  GoalContribution,
+  UserCategoryOverride,
+  IncomePrediction
 };

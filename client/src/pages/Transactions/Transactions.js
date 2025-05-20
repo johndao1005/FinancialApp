@@ -7,8 +7,9 @@
  * 3. Editing capabilities for existing transactions
  * 4. Support for recurring transaction management
  * 5. Pagination for handling large transaction histories
+ * 6. Smart category assignment with user preferences
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Card,
@@ -18,8 +19,11 @@ import {
   Row,
   Col,
   Space,
-  Divider
+  Divider,
+  Button,
+  message
 } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import {
   fetchTransactions,
@@ -27,6 +31,11 @@ import {
   updateTransaction
 } from '../../redux/slices/transactionSlice';
 import { fetchCategories } from '../../redux/slices/categorySlice';
+import { 
+  createCategoryOverride, 
+  applyCategoryRules,
+  generateRulesFromPatterns
+} from '../../redux/slices/categoryOverrideSlice';
 
 import TopMerchantsChart from '../../components/TopMerchantsChart';
 // Import components
@@ -34,6 +43,9 @@ import TransactionTable from './component/TransactionTable';
 import TransactionFilters from './component/TransactionFilters';
 import TransactionEditForm from './component/TransactionEditForm';
 import TransactionStats from './component/TransactionStats';
+import CategoryChange from '../../components/CategoryChange';
+import SkeletonLoader from '../../components/SkeletonLoader';
+import OnboardingTooltip from '../../components/OnboardingTooltip';
 
 const { Title } = Typography;
 
@@ -42,6 +54,7 @@ const Transactions = () => {
   // Redux state selectors
   const { transactions, loading, totalPages, currentPage } = useSelector(state => state.transactions);
   const { categories } = useSelector(state => state.categories);
+  const { loading: categoryOverrideLoading, generatedRules } = useSelector(state => state.categoryOverride);
 
   // Pagination and filtering state
   const [page, setPage] = useState(1);
@@ -51,13 +64,24 @@ const Transactions = () => {
     endDate: '',
     category: ''
   });
-
   // For time frame selection for charts
   const [timeFrame, setTimeFrame] = useState('month'); // 'week', 'month', 'year'
 
   // For editing transactions
   const [editMode, setEditMode] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
+  
+  // For category change modal
+  const [categoryChangeVisible, setCategoryChangeVisible] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  
+  // For applying and generating category rules
+  const [applyingRules, setApplyingRules] = useState(false);
+  const [generatingRules, setGeneratingRules] = useState(false);
+  
+  // For showing generated rules modal
+  const [rulesModalVisible, setRulesModalVisible] = useState(false);
+  
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -65,7 +89,14 @@ const Transactions = () => {
     dispatch(fetchTransactions({ page, filters }));
     dispatch(fetchCategories());
   }, [dispatch, page]);
-
+  
+  useEffect(() => {
+    // Show modal when rules are generated
+    if (generatedRules && generatedRules.length > 0) {
+      setRulesModalVisible(true);
+    }
+  }, [generatedRules]);
+  
   /**
    * Apply filter criteria to transaction list
    * 
@@ -125,20 +156,28 @@ const Transactions = () => {
   const handleDelete = (id) => {
     dispatch(deleteTransaction(id));
   };
-
   /**
    * Begin editing a transaction
    * 
    * Sets up the edit modal with the transaction's current values
+   * or opens the category change modal if editType is 'category'
    * 
    * @param {Object} transaction - The transaction object to edit
+   * @param {string} editType - Type of edit ('full' or 'category')
    */
-  const handleEdit = (transaction) => {
-    setEditingTransaction({
-      ...transaction,
-      date: transaction.date.substring(0, 10) // Format to YYYY-MM-DD
-    });
-    setEditMode(true);
+  const handleEdit = (transaction, editType = 'full') => {
+    if (editType === 'category') {
+      // Open category change modal
+      setSelectedTransaction(transaction);
+      setCategoryChangeVisible(true);
+    } else {
+      // Open full transaction edit modal
+      setEditingTransaction({
+        ...transaction,
+        date: transaction.date.substring(0, 10) // Format to YYYY-MM-DD
+      });
+      setEditMode(true);
+    }
   };
 
   /**
@@ -200,7 +239,6 @@ const Transactions = () => {
     setEditMode(false);
     setEditingTransaction(null);
   };
-
   /**
    * Handle changing the selected time frame for statistics
    * 
@@ -211,6 +249,75 @@ const Transactions = () => {
 
     // Could update transaction filters based on the time frame
     // to show relevant transaction data for the selected period
+  };
+
+  /**
+   * Handle saving a category change, optionally creating a rule 
+   * for future categorization
+   * 
+   * @param {Object} categoryRule - Data for creating a category rule (optional)
+   */
+  const handleCategorySave = async (categoryRule) => {
+    try {
+      // If we have a category rule, create it
+      if (categoryRule) {
+        await dispatch(createCategoryOverride(categoryRule)).unwrap();
+      }
+      
+      // Reset the category change modal
+      setCategoryChangeVisible(false);
+      setSelectedTransaction(null);
+      
+      // Refresh transactions to show the updated category
+      dispatch(fetchTransactions({ page, filters }));
+    } catch (error) {
+      message.error('Failed to save category changes');
+    }
+  };
+
+  /**
+   * Apply category rules to all current transactions
+   */
+  const handleApplyRules = async () => {
+    try {
+      setApplyingRules(true);
+      const result = await dispatch(applyCategoryRules({ 
+        transactionIds: null,
+        skipExistingCategories: true
+      })).unwrap();
+      
+      message.success(`${result.message} (Updated ${result.updatedCount} transactions)`);
+      
+      // Refresh transactions to show the updated categories
+      dispatch(fetchTransactions({ page, filters }));
+    } catch (error) {
+      message.error('Failed to apply category rules: ' + (error || 'Unknown error'));
+    } finally {
+      setApplyingRules(false);
+    }
+  };
+  
+  /**
+   * Auto-generate category rules based on transaction patterns
+   * 
+   * @param {string} type - Type of rules to generate (merchants, amounts, or both)
+   */
+  const handleGenerateRules = async (type) => {
+    try {
+      setGeneratingRules(true);
+      
+      const options = {
+        minOccurrences: 3,
+        findMerchants: type === 'merchants' || type === 'both',
+        findAmounts: type === 'amounts' || type === 'both'
+      };
+      
+      await dispatch(generateRulesFromPatterns(options)).unwrap();
+    } catch (error) {
+      message.error('Failed to generate category rules: ' + (error || 'Unknown error'));
+    } finally {
+      setGeneratingRules(false);
+    }
   };
 
   // Get time frame label
@@ -242,15 +349,17 @@ const Transactions = () => {
             onTimeFrameChange={handleTimeFrameChange}
           />
         </Col>
-      </Row>
-
-      <Row gutter={[0, 16]}>
+      </Row>      <Row gutter={[0, 16]}>
         <Col span={24}>
           <TransactionFilters
             form={form}
             categories={categories}
             onFilterChange={handleFilterChange}
             onReset={resetFilters}
+            onApplyRules={handleApplyRules}
+            onGenerateRules={handleGenerateRules}
+            applyingRules={applyingRules}
+            generatingRules={generatingRules}
           />
         </Col>
       </Row>
@@ -258,15 +367,19 @@ const Transactions = () => {
       <Row gutter={[0, 16]}>
         <Col span={24}>
           <Card>
-            <TransactionTable
-              transactions={transactions}
-              loading={loading}
-              totalPages={totalPages}
-              currentPage={currentPage}
-              onPageChange={setPage}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            {loading ? (
+              <SkeletonLoader type="table" rows={10} />
+            ) : (
+              <TransactionTable
+                transactions={transactions}
+                loading={loading}
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={setPage}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            )}
           </Card>
         </Col>
       </Row>
@@ -302,8 +415,61 @@ const Transactions = () => {
             setEditingTransaction(null);
           }}
           onSubmit={handleEditSubmit}
-        />
+        />      </Modal>
+
+      {/* Category Change Modal */}
+      <CategoryChange
+        visible={categoryChangeVisible}
+        transaction={selectedTransaction}
+        categories={categories}
+        onCancel={() => {
+          setCategoryChangeVisible(false);
+          setSelectedTransaction(null);        }}
+        onSave={handleCategorySave}
+      />
+      
+      {/* Generated Rules Modal */}
+      <Modal
+        title="Generated Category Rules"
+        open={rulesModalVisible}
+        onCancel={() => setRulesModalVisible(false)}
+        footer={[
+          <Button key="apply" type="primary" onClick={() => {
+            setRulesModalVisible(false);
+            handleApplyRules();
+          }}>
+            Apply Rules Now
+          </Button>,
+          <Button key="close" onClick={() => setRulesModalVisible(false)}>
+            Close
+          </Button>
+        ]}
+        width={700}
+      >
+        {generatedRules && generatedRules.length > 0 ? (
+          <>
+            <p>Successfully created {generatedRules.length} new category rules based on your transaction history:</p>
+            <ul>
+              {generatedRules.map((rule, index) => (
+                <li key={index}>
+                  {rule.matchField === 'merchant' ? (
+                    <>Merchant <strong>"{rule.pattern}"</strong> will be categorized as </>
+                  ) : (
+                    <>Transactions of <strong>${rule.amount}</strong> will be categorized as </>
+                  )}
+                  <strong>{categories.find(c => c.id === rule.categoryId)?.name || 'Unknown'}</strong>
+                  {rule.occurrences && <> (based on {rule.occurrences} transactions)</>}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <p>No new category rules were generated. Try adding more transactions with consistent categories first.</p>
+        )}
       </Modal>
+      
+      {/* User onboarding tour */}
+      <OnboardingTooltip />
     </div>
   );
 };

@@ -12,7 +12,8 @@ import {
   UserOutlined,
   DollarOutlined,
   FlagOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  RiseOutlined
 } from '@ant-design/icons';
 
 /**
@@ -29,6 +30,11 @@ export const ROUTES = {
     path: '/transactions',
     name: 'Transactions',
     icon: TransactionOutlined
+  },
+  INCOME: {
+    path: '/income',
+    name: 'Income',
+    icon: RiseOutlined
   },
   BUDGETS: {
     path: '/budgets',

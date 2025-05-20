@@ -26,6 +26,8 @@ const userRoutes = require('./routes/user.routes');
 const categoryRoutes = require('./routes/category.routes');
 const budgetRoutes = require('./routes/budget.routes');
 const goalRoutes = require('./routes/goal.routes');
+const userCategoryOverrideRoutes = require('./routes/userCategoryOverride.routes');
+const incomePredictionRoutes = require('./routes/incomePrediction.routes');
 
 // Apply routes
 app.use('/api/auth', authRoutes);
@@ -34,6 +36,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/goals', goalRoutes);
+app.use('/api/category-overrides', userCategoryOverrideRoutes);
+app.use('/api/income', incomePredictionRoutes);
 
 // Root route
 app.get('/', (req, res) => {

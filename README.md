@@ -98,19 +98,26 @@ This type of app is valuable for:
 * Build dashboard UI: pie chart (category distribution), line chart (monthly spend), top merchants
 * Enable basic filtering by date range, category, etc.
 
-### 🧪 Phase 3: Feedback Loop & UX Polish
+### 🧪 Phase 3: Feedback Loop & UX Polish ✅ (Completed)
 
-* Allow users to **reassign incorrect categories**
-* Store user preferences to improve future predictions
-* Add validation, error messages, and success toasts
-* Export data to CSV for user backup
+* ✅ Allow users to **reassign incorrect categories** from the transaction table
+* ✅ Store user preferences to improve future predictions with smart category rules
+* ✅ Add validation, error messages, and success toasts for user actions
+* ✅ Export data to CSV for user backup
+* ✅ Use skeleton loaders for tables and charts to improve perceived performance
+* ✅ Add user onboarding tooltips for new users
+* ✅ Implement code splitting with React.lazy for faster initial load
+* ✅ Add QuickTransactionEntry component in Navbar for quick transaction creation
+* ✅ Auto-generate category rules from transaction patterns
+* ✅ Add comprehensive test suite for components and Redux slices
 
-### 📈 Phase 4: Premium Feature Integration (Business Tier)
+### 📈 Phase 4: Wealth Tracking & Asset Management
 
-* OAuth-based **bank account connection** (via Plaid or TrueLayer API)
-* Create "Smart Categorization Rules" (e.g., if merchant = Uber, category = Transport)
-* Add **budget planning module** (set monthly limits per category)
-* Enable **multi-currency conversion** with exchange rate API
+* Income prediction and trend analysis
+* **Asset Management Platform** (property, stocks, crypto, term deposits)
+* Asset valuation tracking with depreciation/appreciation calculations
+* Net worth dashboard with comprehensive wealth measurement
+* Investment portfolio performance tracking and visualization
 
 ### 🏦 Phase 5: Go-Live & Monetization
 
@@ -153,7 +160,7 @@ Would you like a **starter repo layout**, **UI mockups**, or a **pitch deck** ne
 
 ## Project Progress
 
-### Current Status: Phase 2 - Budget Management and Financial Goals (Completed)
+### Current Status: Phase 3 - Performance Optimization & User Experience (Completed)
 
 The SmartSpend project has successfully completed Phase 2 implementation, adding significant new functionality to help users manage their finances more effectively.
 
@@ -213,21 +220,52 @@ The SmartSpend project has successfully completed Phase 2 implementation, adding
    - Updated navigation to include new features
    - Implemented responsive layouts for all new components
 
-#### Current Work in Progress: Phase 3 Implementation
+#### Phase 3 Achievements (Completed)
 
-1. **Enhanced Reporting**
-   - Improving data visualization with more chart types
-   - Adding time-based filtering options
-   - Developing comparative analysis tools
+1. **Performance Optimization**
+   - Implemented code splitting using React.lazy and Suspense
+   - Created LoadingFallback component for better user experience during loads
+   - Optimized bundle size for faster initial page rendering
+   - Added QuickTransactionEntry component in Navbar for easy transaction creation
 
-2. **Multiple Account Support**
-   - Adding account models and management functionality
-   - Implementing UI for multi-account dashboards
+2. **Smart Category Management**
+   - Implemented UserCategoryOverride system for storing user preferences
+   - Created category rules system for improved auto-categorization
+   - Added ability to reassign incorrect categories from transaction table
+   - Implemented auto-generation of rules from transaction patterns
+   - Added comprehensive category rule management UI
 
-3. **Machine Learning Improvements**
-   - Refining transaction categorization accuracy
-   - Implementing spending pattern detection
-   - Adding anomaly detection for unusual transactions
+3. **User Experience Enhancements**
+   - Added SkeletonLoader components for content placeholders during loading
+   - Implemented OnboardingTooltip component for new user guidance
+   - Added success/error messages and validations
+   - Enhanced user feedback throughout the application
+
+#### Current Work in Progress: Phase 4 Implementation (Upcoming)
+
+1. **Income Prediction & Analysis**
+   - Implementing income trend visualization and forecasting
+   - Developing recurring income detection algorithms
+   - Creating income source categorization system
+   - Adding income stability metrics and dashboards
+
+2. **Asset Management Platform**
+   - Creating comprehensive asset tracking models and UI
+   - Supporting multiple asset types (property, stocks, crypto, term deposits)
+   - Implementing valuation tracking with historical data
+   - Adding depreciation/appreciation calculations for different asset types
+
+3. **Wealth Measurement & Analysis**
+   - Building net worth dashboard with comprehensive wealth visualization
+   - Implementing asset allocation analysis
+   - Creating wealth growth tracking over time
+   - Developing portfolio performance metrics and comparisons
+
+4. **Investment Portfolio Tracking**
+   - Adding support for investment performance monitoring
+   - Creating ROI calculations for different investment types
+   - Implementing asset diversification visualization
+   - Adding market value integration for real-time valuations
 
 ## Tech Stack
 
@@ -251,53 +289,54 @@ The SmartSpend project has successfully completed Phase 2 implementation, adding
 
 ## Development Status
 
-### Current Status: Phase 2 Completed, Moving to Phase 3
+### Current Status: Phase 3 Completed, Moving to Phase 4
 
-#### Recently Completed Phase 2 Implementations
+#### Recently Completed Phase 3 Implementations
 
-1. **Backend API Enhancements**
-   - Added missing logout function to auth controller
-   - Implemented Category controller with full CRUD operations
-   - Created Category routes for API endpoints
-   - Fixed model relationships for user-created categories and subcategories
-   - Added default categories seeding functionality
-   - Changed server port from 5000 to 5001 to avoid conflicts
-   - Configured CORS properly to allow client requests
+1. **Performance Optimization**
+   - Implemented code splitting using React.lazy and Suspense
+   - Created LoadingFallback component for better user experience during loads
+   - Optimized bundle size for faster initial page rendering
+   - Added QuickTransactionEntry component in Navbar for easy transaction creation
 
-2. **Frontend Improvements**
-   - Configured axios utility for centralized API request handling
-   - Fixed token handling in all Redux slices
-   - Updated Redux slices to use the configured axios instance
-   - Updated API request endpoints to match backend changes
+2. **Smart Category Management**
+   - Implemented UserCategoryOverride system for storing user preferences
+   - Created category rules system for improved auto-categorization
+   - Added ability to reassign incorrect categories from transaction table
+   - Implemented auto-generation of rules from transaction patterns
+   - Added comprehensive category rule management UI
 
-3. **Database Changes**
-   - Fixed field definitions in models (userId in Category, userId and categoryId in Transaction)
-   - Installed SQLite for database development
+3. **User Experience Enhancements**
+   - Added SkeletonLoader components for content placeholders during loading
+   - Implemented OnboardingTooltip component for new user guidance
+   - Added success/error messages and validations
+   - Enhanced user feedback throughout the application
 
-4. **Phase 2 Implementation Achievements**
-   - Created budget and goal models with comprehensive fields and relationships
-   - Implemented controllers for budget and goal management with full CRUD operations
-   - Added API endpoints for budget and goal tracking
-   - Created Redux slices for budget and goal state management
-   - Developed UI components for budget and goal visualization
-   - Implemented contribution tracking for financial goals
-   - Added progress indicators for budget utilization
+#### Current Work in Progress: Phase 4 Implementation (Upcoming)
 
-#### Current Work in Progress: Phase 3 Implementation
+1. **Income Prediction & Analysis**
+   - Implementing income trend visualization and forecasting
+   - Developing recurring income detection algorithms
+   - Creating income source categorization system
+   - Adding income stability metrics and dashboards
 
-1. **Enhanced Reporting**
-   - Improving data visualization with more chart types
-   - Adding time-based filtering options
-   - Developing comparative analysis tools
+2. **Asset Management Platform**
+   - Creating comprehensive asset tracking models and UI
+   - Supporting multiple asset types (property, stocks, crypto, term deposits)
+   - Implementing valuation tracking with historical data
+   - Adding depreciation/appreciation calculations for different asset types
 
-2. **Multiple Account Support**
-   - Adding account models and management functionality
-   - Implementing UI for multi-account dashboards
+3. **Wealth Measurement & Analysis**
+   - Building net worth dashboard with comprehensive wealth visualization
+   - Implementing asset allocation analysis
+   - Creating wealth growth tracking over time
+   - Developing portfolio performance metrics and comparisons
 
-3. **Machine Learning Improvements**
-   - Refining transaction categorization accuracy
-   - Implementing spending pattern detection
-   - Adding anomaly detection for unusual transactions
+4. **Investment Portfolio Tracking**
+   - Adding support for investment performance monitoring
+   - Creating ROI calculations for different investment types
+   - Implementing asset diversification visualization
+   - Adding market value integration for real-time valuations
 
 ## Getting Started
 
@@ -585,3 +624,40 @@ For questions or support, please reach out to the project maintainers or open an
 ---
 
 Last updated: May 18, 2025
+
+## Backlog
+
+Step 1: Analyze Bundle Size
+Action: Add webpack-bundle-analyzer to the client’s devDependencies and run it to visualize bundle size.
+Impact: Identifies large dependencies and code bloat, guiding further optimization.
+Step 2: Enable Code Splitting
+Action: Refactor the client (likely React) to use dynamic imports and React.lazy/Suspense for code splitting.
+Impact: Reduces initial bundle size, improving first load time.
+Step 6: Remove Unused Dependencies
+Action: Audit package.json in both root and client folders for unused dependencies.
+Impact: Smaller bundles, fewer security risks, and faster installs.
+Step 7: Lazy Load Non-Critical Components
+Action: Refactor client code to lazy load heavy or non-essential components.
+Impact: Faster initial render, with some features loading on demand.
+
+---
+**Phase 3 Implementation List: ✅ COMPLETED**
+- ✅ Allow users to reassign incorrect categories from the transaction table
+- ✅ Store user preferences to improve future predictions
+- ✅ Add validation, error messages, and success toasts
+- ✅ Export data to CSV for user backup
+- ✅ Use skeleton loaders for tables and charts to improve perceived performance
+- ✅ Add user onboarding tooltips for new users
+- ✅ Implement code splitting with React.lazy
+- ✅ Add QuickTransactionEntry in Navbar
+- ✅ Auto-generate category rules from transaction patterns
+- ✅ Add comprehensive test suite
+
+---
+**Phase 4 Implementation List: (Upcoming)**
+- Income prediction and trend analysis
+- Asset management for multiple assets (property, stocks, crypto, term deposits)
+- Wealth measurement and net worth tracking
+- Investment portfolio performance monitoring
+- Asset valuation with depreciation/appreciation tracking
+- Diversification analysis and visualization

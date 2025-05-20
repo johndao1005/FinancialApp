@@ -41,12 +41,19 @@ const TransactionTable = ({
           )}
         </div>
       )
-    },
-    {
+    },    {
       title: 'Category',
       dataIndex: 'category',
-      key: 'category',
-      render: category => category?.name || 'Uncategorized'
+      key: 'category',      render: (category, record) => (
+        <Tag 
+          color="blue" 
+          style={{ cursor: 'pointer' }}
+          onClick={() => onEdit(record, 'category')}
+          className="transaction-category"
+        >
+          {category?.name || 'Uncategorized'}
+        </Tag>
+      )
     },
     {
       title: 'Amount',
