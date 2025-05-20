@@ -9,30 +9,29 @@ NC="\033[0m" # No Color
 
 # Print header
 echo -e "${CYAN}=========================================${NC}"
-echo -e "${CYAN}    Fix Database Constraint Error       ${NC}"
+echo -e "${CYAN}      Fix Email Unique Constraint        ${NC}"
 echo -e "${CYAN}=========================================${NC}"
 echo
 
-# Change to the server directory
-cd "$(dirname "$0")/server" || {
-  echo -e "${RED}Error: Cannot find server directory.${NC}"
+# Check if Node.js is installed
+if ! command -v node &> /dev/null; then
+  echo -e "${RED}Error: Node.js is not installed.${NC}"
+  echo -e "${YELLOW}Please install Node.js and try again.${NC}"
   exit 1
-}
+fi
 
 echo -e "${GREEN}Working directory: $(pwd)${NC}"
-echo
 
-# Check if sqlite3 is installed
-if ! npm list sqlite3 | grep -q sqlite3; then
+# Check if sqlite3 module is installed
+if ! node -e "try{require('sqlite3');}catch(e){process.exit(1)}" &> /dev/null; then
   echo -e "${YELLOW}Installing sqlite3 module...${NC}"
-  npm install sqlite3 --save
+  npm install sqlite3 --no-save
 fi
 
 # Run the fix script
 echo -e "${CYAN}Running database fix script...${NC}"
-node src/utils/fix_email_constraint.js
+node fix_unique_constraint.js
 
-echo
-echo -e "${GREEN}Repair process completed.${NC}"
+echo -e "${GREEN}Fix process completed.${NC}"
 echo -e "${YELLOW}Try restarting your server now with:${NC}"
-echo -e "cd \"$(pwd)\" && npm start"
+echo -e "cd server && npm start"

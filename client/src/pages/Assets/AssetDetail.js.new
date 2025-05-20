@@ -1,0 +1,374 @@
+/**
+ * Asset Detail Page
+ * 
+ * Displays detailed information about a specific asset including:
+ * - Current valuation and performance metrics
+ * - Transaction history
+ * - Historical value chart
+ * - Asset-specific attributes
+ */
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  fetchAssetById, 
+  fetchAssetHistory, 
+  createAssetTransaction, 
+  updateAsset,
+  deleteAsset
+} from '../../redux/slices/assetSlice';
+import {
+  Container,
+  Alert,
+  Box,
+  Tabs,
+  Tab,
+  CircularProgress,
+  Button
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { TabPanel } from '../../constants/assetConstants';
+import { 
+  AssetMetrics, 
+  AssetTransactions, 
+  AssetDetailHeader,
+  AssetDetails,
+  AssetValueHistory,
+  AssetEditDialog,
+  AssetTransactionDialog
+} from './component';
+import { calculateAssetMetrics } from './utils/assetPageUtils';
+import ValuationUpdateDialog from '../../components/Assets/ValuationUpdateDialog';
+
+// Register ChartJS components
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
+const AssetDetail = () => {
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  
+  // Local state
+  const [tabValue, setTabValue] = useState(0);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
+  const [valuationDialogOpen, setValuationDialogOpen] = useState(false);
+  const [historyPeriod, setHistoryPeriod] = useState('all'); // '1m', '3m', '6m', '1y', 'all'
+  
+  // Redux state
+  const { 
+    currentAsset, 
+    transactions, 
+    assetHistory,
+    loading,
+    transactionLoading, 
+    historyLoading,
+    error 
+  } = useSelector(state => state.assets);
+  
+  // Form state for edit asset dialog
+  const [editAssetData, setEditAssetData] = useState({
+    name: '',
+    currentValue: '',
+    notes: '',
+    isInvestment: false,
+    isActive: true,
+    soldDate: new Date().toISOString().split('T')[0],
+    saleValue: '',
+    annualRateOfReturn: ''
+  });
+  
+  // Form state for add transaction dialog
+  const [transactionData, setTransactionData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    transactionType: 'valuation_update',
+    amount: '',
+    quantity: '',
+    notes: ''
+  });
+  
+  // Load asset data on component mount
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchAssetById(id));
+      dispatch(fetchAssetHistory({ assetId: id, period: historyPeriod }));
+    }
+  }, [dispatch, id]);
+  
+  // Update edit form data when asset loads
+  useEffect(() => {
+    if (currentAsset) {
+      setEditAssetData({
+        name: currentAsset.name,
+        currentValue: currentAsset.currentValue,
+        notes: currentAsset.notes || '',
+        isInvestment: currentAsset.isInvestment,
+        isActive: currentAsset.isActive,
+        soldDate: currentAsset.soldDate || new Date().toISOString().split('T')[0],
+        saleValue: currentAsset.saleValue || currentAsset.currentValue,
+        annualRateOfReturn: currentAsset.annualRateOfReturn || ''
+      });
+    }
+  }, [currentAsset]);
+
+  // When history period changes, reload history data
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchAssetHistory({ assetId: id, period: historyPeriod }));
+    }
+  }, [dispatch, id, historyPeriod]);
+  
+  // Event Handlers
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+  
+  const handleGoBack = () => {
+    navigate('/assets');
+  };
+  
+  const handleOpenEditDialog = () => {
+    setEditDialogOpen(true);
+  };
+  
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+  };
+  
+  const handleOpenTransactionDialog = () => {
+    setTransactionDialogOpen(true);
+    
+    // Reset transaction form
+    setTransactionData({
+      date: new Date().toISOString().split('T')[0],
+      transactionType: 'valuation_update',
+      amount: '',
+      quantity: '',
+      notes: ''
+    });
+  };
+  
+  const handleCloseTransactionDialog = () => {
+    setTransactionDialogOpen(false);
+  };
+  
+  const handleOpenValuationDialog = () => {
+    setValuationDialogOpen(true);
+  };
+  
+  const handleCloseValuationDialog = () => {
+    setValuationDialogOpen(false);
+  };
+  
+  const handleOpenDeleteDialog = () => {
+    setDeleteDialogOpen(true);
+  };
+  
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+  };
+  
+  const handleEditAssetChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditAssetData({
+      ...editAssetData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+  
+  const handleTransactionChange = (e) => {
+    const { name, value } = e.target;
+    setTransactionData({
+      ...transactionData,
+      [name]: value
+    });
+  };
+  
+  const handleUpdateAsset = () => {
+    dispatch(updateAsset({ 
+      assetId: id, 
+      assetData: editAssetData 
+    }));
+    
+    setEditDialogOpen(false);
+  };
+  
+  const handleDeleteAsset = () => {
+    dispatch(deleteAsset(id));
+    navigate('/assets');
+  };
+  
+  const handleAddTransaction = () => {
+    const newTransaction = {
+      assetId: id,
+      ...transactionData,
+      amount: parseFloat(transactionData.amount),
+      quantity: transactionData.quantity ? parseFloat(transactionData.quantity) : null
+    };
+    
+    dispatch(createAssetTransaction(newTransaction));
+    setTransactionDialogOpen(false);
+  };
+  
+  const handleHistoryPeriodChange = (period) => {
+    setHistoryPeriod(period);
+  };
+  
+  // Loading state
+  if (loading && !currentAsset) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Box display="flex" justifyContent="center" my={8}>
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
+  
+  // Error state
+  if (error && !currentAsset) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={handleGoBack}
+        >
+          Back to Assets
+        </Button>
+      </Container>
+    );
+  }
+  
+  // If asset not loaded yet
+  if (!currentAsset) {
+    return null;
+  }
+  
+  // Calculate asset metrics
+  const assetMetrics = calculateAssetMetrics(currentAsset);
+  
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      
+      {/* Asset Header */}
+      <AssetDetailHeader 
+        asset={currentAsset}
+        metrics={assetMetrics}
+        onGoBack={handleGoBack}
+        onEdit={handleOpenEditDialog}
+        onAddTransaction={handleOpenTransactionDialog}
+      />
+      
+      {/* Asset Metrics Section */}
+      <AssetMetrics asset={currentAsset} />
+      
+      {/* Tabs for details, transactions, and history */}
+      <Box sx={{ mb: 4 }}>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          textColor="primary"
+          indicatorColor="primary"
+          aria-label="asset details tabs"
+        >
+          <Tab label="Details" />
+          <Tab label="Transactions" />
+          <Tab label="Value History" />
+        </Tabs>
+        
+        {/* Details Tab */}
+        <TabPanel value={tabValue} index={0}>
+          <AssetDetails 
+            asset={currentAsset} 
+            metrics={assetMetrics}
+          />
+        </TabPanel>
+        
+        {/* Transactions Tab */}
+        <TabPanel value={tabValue} index={1}>
+          <AssetTransactions 
+            assetId={id}
+            assetType={currentAsset.assetType}
+            transactions={transactions}
+            isLoading={transactionLoading}
+            isActive={currentAsset.isActive}
+            onAddTransaction={handleAddTransaction}
+            onOpenAddDialog={handleOpenTransactionDialog}
+          />
+        </TabPanel>
+        
+        {/* Value History Tab */}
+        <TabPanel value={tabValue} index={2}>
+          <AssetValueHistory 
+            asset={currentAsset}
+            history={assetHistory}
+            isLoading={historyLoading}
+            period={historyPeriod}
+            onPeriodChange={handleHistoryPeriodChange}
+            onOpenValuationDialog={handleOpenValuationDialog}
+          />
+        </TabPanel>
+      </Box>
+      
+      {/* Edit Asset Dialog */}
+      <AssetEditDialog
+        open={editDialogOpen}
+        assetData={editAssetData}
+        onChange={handleEditAssetChange}
+        onClose={handleCloseEditDialog}
+        onSave={handleUpdateAsset}
+        onDelete={handleOpenDeleteDialog}
+      />
+      
+      {/* Add Transaction Dialog */}
+      <AssetTransactionDialog
+        open={transactionDialogOpen}
+        asset={currentAsset}
+        transactionData={transactionData}
+        onChange={handleTransactionChange}
+        onClose={handleCloseTransactionDialog}
+        onSave={handleAddTransaction}
+      />
+      
+      {/* Valuation Update Dialog */}
+      <ValuationUpdateDialog 
+        open={valuationDialogOpen}
+        onClose={handleCloseValuationDialog}
+        asset={currentAsset}
+      />
+    </Container>
+  );
+};
+
+export default AssetDetail;

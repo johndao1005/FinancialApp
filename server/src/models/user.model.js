@@ -36,14 +36,18 @@ module.exports = (sequelize, DataTypes) => {
     lastName: {
       type: DataTypes.STRING,
       allowNull: false
-    },
-    // User's email address - used for login and notifications
+    },    // User's email address - used for login and notifications
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,         // Email must be unique
+      unique: {
+        name: 'users_email_unique',
+        msg: 'This email is already registered'
+      },
       validate: {
-        isEmail: true       // Must be a valid email format
+        isEmail: {
+          msg: 'Please enter a valid email address'
+        }
       }
     },
     // Hashed password for authentication

@@ -10,7 +10,7 @@ import {
   EditOutlined,
   DeleteOutlined
 } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const TransactionTable = ({ 
   transactions, 
@@ -22,12 +22,11 @@ const TransactionTable = ({
   onDelete
 }) => {
   const columns = [
-    {
-      title: 'Date',
+    {      title: 'Date',
       dataIndex: 'date',
       key: 'date',
-      sorter: (a, b) => moment(a.date).unix() - moment(b.date).unix(),
-      render: date => moment(date).format('MMM D, YYYY')
+      sorter: (a, b) => dayjs(a.date).unix() - dayjs(b.date).unix(),
+      render: date => dayjs(date).format('MMM D, YYYY')
     },
     {
       title: 'Description',

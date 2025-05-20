@@ -11,7 +11,7 @@ import {
   Col,
   Divider
 } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -26,13 +26,12 @@ const TransactionEditForm = ({
   // Only show the form if there's a transaction to edit
   if (!transaction) return null;
 
-  return (
-    <Form
+  return (    <Form
       layout="vertical"
       initialValues={{
         ...transaction,
-        date: transaction.date ? moment(transaction.date) : moment(),
-        recurringEndDate: transaction.recurringEndDate ? moment(transaction.recurringEndDate) : null
+        date: transaction.date ? dayjs(transaction.date) : dayjs(),
+        recurringEndDate: transaction.recurringEndDate ? dayjs(transaction.recurringEndDate) : null
       }}
       onValuesChange={onChange}
       onFinish={onSubmit}
@@ -137,11 +136,10 @@ const TransactionEditForm = ({
               <Form.Item
                 name="recurringEndDate"
                 label="End Date (Optional)"
-              >
-                <DatePicker 
+              >                <DatePicker 
                   style={{ width: '100%' }}
                   format="YYYY-MM-DD"
-                  disabledDate={(current) => current && current < moment().endOf('day')}
+                  disabledDate={(current) => current && current < dayjs().endOf('day')}
                 />
               </Form.Item>
             </Col>

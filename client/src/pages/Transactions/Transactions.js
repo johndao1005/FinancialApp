@@ -24,7 +24,7 @@ import {
   message
 } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import {
   fetchTransactions,
   deleteTransaction,

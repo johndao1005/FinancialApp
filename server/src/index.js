@@ -51,8 +51,18 @@ app.get('/', (req, res) => {
 // Start server
 async function startServer() {
   try {
-    // Sync database
-    await sequelize.sync({ alter: true });
+    // First try to sync without altering tables to avoid errors
+    try {
+      console.log('Attempting to sync database...');
+      await sequelize.sync({ force: false, alter: false });
+      console.log('Database connected successfully');
+    } catch (syncError) {
+      console.warn('Basic sync failed, attempting with alter option...');
+      console.warn('If this fails, please run the database cleanup script first.');
+      // Try with alter option, but catch errors
+      await sequelize.sync({ force: false, alter: true });
+    }
+    
     console.log('Database synchronized');
     
     // Seed default categories
@@ -64,6 +74,8 @@ async function startServer() {
     });
   } catch (error) {
     console.error('Unable to start server:', error);
+    console.error('\nPlease try running the database cleanup script:');
+    console.error('bash clean_db_completely.sh');
   }
 }
 

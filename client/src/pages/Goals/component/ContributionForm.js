@@ -8,7 +8,7 @@ import {
   Row, 
   Col 
 } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const { TextArea } = Input;
 
@@ -48,10 +48,9 @@ const ContributionForm = ({ form, onFinish, onCancel }) => {
             name="date"
             label="Date"
             rules={[{ required: true, message: 'Please select a date' }]}
-          >
-            <DatePicker 
+          >            <DatePicker 
               style={{ width: '100%' }}
-              disabledDate={(current) => current && current > moment().endOf('day')}
+              disabledDate={(current) => current && current > dayjs().endOf('day')}
             />
           </Form.Item>
         </Col>
