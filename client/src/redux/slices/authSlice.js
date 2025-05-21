@@ -11,7 +11,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../utils/axios';
 import { AUTH_API, USER_API } from '../../constants';
-
+import tokenStorage from '../../utils/tokenStorage';
 
 // Define the initial state
 const initialState = {
@@ -27,7 +27,7 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await axios.post(AUTH_API.REGISTER, userData);
-      localStorage.setItem('token', response.data.token);
+      await tokenStorage.setAuthToken(response.data.token);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -42,9 +42,27 @@ export const loginUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await axios.post(AUTH_API.LOGIN, userData);
-      localStorage.setItem('token', response.data.token);
+      const success = await tokenStorage.setAuthToken(response.data.token);
+      
+      if (!success) {
+        throw new Error('Failed to securely store authentication token');
+      }
+      
       return response.data;
     } catch (error) {
+      // Record the failed login attempt for security
+      if (error.response && (error.response.status === 401 || error.response.status === 400)) {
+        const lockoutInfo = await tokenStorage.recordFailedLoginAttempt();
+        
+        // If user is locked out, provide that information
+        if (lockoutInfo.isLockedOut) {
+          const lockoutEndTime = lockoutInfo.lockoutEnds.toLocaleTimeString();
+          return rejectWithValue(
+            `Too many failed login attempts. Please try again after ${lockoutEndTime}`
+          );
+        }
+      }
+      
       return rejectWithValue(
         error.response?.data?.message || 'Login failed'
       );
@@ -55,18 +73,15 @@ export const loginUser = createAsyncThunk(
 export const loadUser = createAsyncThunk(
   'auth/loadUser',
   async (_, { rejectWithValue }) => {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      return rejectWithValue('No token found');
-    }
-    
     try {
-      const response = await axios.get(USER_API.PROFILE, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      // Check if user is authenticated using secure token storage
+      const isAuth = await tokenStorage.isAuthenticated();
+      
+      if (!isAuth) {
+        return rejectWithValue('No valid token found');
+      }
+      
+      const response = await axios.get(USER_API.PROFILE);
       
       // Add a formatted name field for easier usage in UI
       const user = response.data;
@@ -74,7 +89,7 @@ export const loadUser = createAsyncThunk(
       
       return user;
     } catch (error) {
-      localStorage.removeItem('token');
+      await tokenStorage.clearAuthToken();
       return rejectWithValue(
         error.response?.data?.message || 'Failed to load user'
       );
@@ -115,10 +130,9 @@ export const updateProfile = createAsyncThunk(
 // Auth slice
 const authSlice = createSlice({
   name: 'auth',
-  initialState,
-  reducers: {
+  initialState,  reducers: {
     logout: (state) => {
-      localStorage.removeItem('token');
+      tokenStorage.clearAuthToken();
       state.user = null;
       state.isAuthenticated = false;
       state.loading = false;

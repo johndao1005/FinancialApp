@@ -7,13 +7,14 @@
  * 3. Authentication-based conditional rendering
  * 4. Theme configuration
  * 5. Code splitting with React.lazy for improved performance
+ * 6. Application security features
  * 
  * The app has two main states:
  * - Authenticated: Shows navigation sidebar and private routes
  * - Unauthenticated: Shows only login/register pages
  */
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { ConfigProvider, Layout, theme, Spin } from 'antd';
@@ -21,6 +22,7 @@ import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import { AssetNotifications } from './components';
 import { ROUTES, PRIMARY_COLORS, UI_SIZES } from './constants';
+import { initSecurity } from './utils/security';
 import './styles/App.css';
 
 const { Content } = Layout;
@@ -54,6 +56,37 @@ const LoadingFallback = () => (
 function App() {
   // Get authentication state from Redux store
   const { isAuthenticated } = useSelector(state => state.auth);
+  
+  // Initialize security features when the app loads
+  useEffect(() => {
+    // Set up security features
+    initSecurity();
+    
+    // Set Content Security Policy dynamically
+    if (process.env.NODE_ENV === 'production') {
+      // Create CSP meta tag
+      const cspMeta = document.createElement('meta');
+      cspMeta.httpEquiv = 'Content-Security-Policy';
+      cspMeta.content = 
+        "default-src 'self'; " +
+        "script-src 'self'; " +
+        "style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; " +
+        "font-src 'self' https://fonts.gstatic.com; " +
+        "img-src 'self' data:; " +
+        "connect-src 'self'";
+      document.head.appendChild(cspMeta);
+    }
+    
+    // Listen for storage events to detect session tampering
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'auth_token' || event.key === 'auth_token_expiry') {
+        // Token was modified in another tab/window - potential attack
+        console.warn('Authentication data modified externally');
+        window.location.href = '/login?security=breach';
+      }
+    });
+    
+  }, []);
 
   return (
     <ConfigProvider
