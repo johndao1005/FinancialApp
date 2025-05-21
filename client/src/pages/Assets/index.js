@@ -16,10 +16,9 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate, useParams } from 'react-router-dom';
-import AddAssetDialog from '../../components/Assets/AddAssetDialog';
 import AssetDetail from './AssetDetail';
 import { TabPanel } from '../../constants/assetConstants';
-import { AssetsStats, AssetsTabs } from './component';
+import { AssetsStats, AssetsTabs, AddAssetDialog } from './component';
 
 const Assets = () => {
   const dispatch = useDispatch();

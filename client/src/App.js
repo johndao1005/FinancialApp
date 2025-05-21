@@ -19,7 +19,7 @@ import { useSelector } from 'react-redux';
 import { ConfigProvider, Layout, theme, Spin } from 'antd';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
-import AssetNotifications from './components/Assets/AssetNotifications';
+import { AssetNotifications } from './components';
 import { ROUTES, PRIMARY_COLORS, UI_SIZES } from './constants';
 import './styles/App.css';
 

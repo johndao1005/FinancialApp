@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { createAsset } from '../../redux/slices/assetSlice';
+import { createAsset } from '../../../redux/slices/assetSlice';
 import {
   Dialog,
   DialogTitle,

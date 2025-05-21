@@ -10,7 +10,7 @@ import React from 'react';
 import { Card, Row, Col, Statistic, List, Typography, Tag, Progress, Divider } from 'antd';
 import { BankOutlined, RiseOutlined, FallOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../constants/navConstants';
+import { ROUTES } from '../../../constants/navConstants';
 
 const { Title, Text } = Typography;
 

@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { createAssetTransaction, updateAsset } from '../../redux/slices/assetSlice';
+import { createAssetTransaction, updateAsset } from '../../../redux/slices/assetSlice';
 import {
   Dialog,
   DialogTitle,
@@ -37,7 +37,7 @@ import {
   calculateDoubleDecliningSalvage,
   calculateAppreciation,
   formatCurrency
-} from '../../utils/assetUtils';
+} from '../../../utils/assetUtils';
 
 const ValuationUpdateDialog = ({ open, onClose, asset }) => {
   const dispatch = useDispatch();

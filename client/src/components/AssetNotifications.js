@@ -6,7 +6,7 @@
  * - Assets approaching target values
  * - Market volatility alerts for investment assets
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { notification } from 'antd';
 import { 
@@ -24,37 +24,47 @@ const AssetNotifications = () => {
   const { assets } = useSelector(state => state.assets);
   const [lastAssetValues, setLastAssetValues] = useState({});
   const [lastNotificationTime, setLastNotificationTime] = useState({});
-
-  // Load last notification times from local storage
+  const processingRef = useRef(false);
+  
+  // Load last notification times from local storage - only on mount
   useEffect(() => {
-    const storedTimes = localStorage.getItem('assetNotificationTimes');
-    if (storedTimes) {
-      setLastNotificationTime(JSON.parse(storedTimes));
-    }
-    
-    const storedValues = localStorage.getItem('lastAssetValues');
-    if (storedValues) {
-      setLastAssetValues(JSON.parse(storedValues));
-    } else if (assets.length > 0) {
-      // Initialize with current values if none stored
-      const initialValues = {};
-      assets.forEach(asset => {
-        initialValues[asset.id] = parseFloat(asset.currentValue);
-      });
-      setLastAssetValues(initialValues);
-      localStorage.setItem('lastAssetValues', JSON.stringify(initialValues));
+    try {
+      const storedTimes = localStorage.getItem('assetNotificationTimes');
+      if (storedTimes) {
+        setLastNotificationTime(JSON.parse(storedTimes));
+      }
+      
+      const storedValues = localStorage.getItem('lastAssetValues');
+      if (storedValues) {
+        setLastAssetValues(JSON.parse(storedValues));
+      } else if (assets.length > 0) {
+        // Initialize with current values if none stored
+        const initialValues = {};
+        assets.forEach(asset => {
+          initialValues[asset.id] = parseFloat(asset.currentValue);
+        });
+        setLastAssetValues(initialValues);
+        localStorage.setItem('lastAssetValues', JSON.stringify(initialValues));
+      }
+    } catch (error) {
+      console.error('Error loading notification data from localStorage:', error);
     }
   }, []);
-
-  // Check for significant changes when assets are updated
-  useEffect(() => {
-    if (assets.length === 0) return;
+  // Memoize the check for significant changes
+  const checkSignificantChanges = useCallback(() => {
+    if (assets.length === 0 || processingRef.current) return;
     
+    processingRef.current = true;
     const now = Date.now();
     const updatedNotificationTimes = { ...lastNotificationTime };
     let shouldUpdateStorage = false;
+    let updatedValues = false;
+    const newValues = {};
     
+    // Process assets in batches for better performance with large lists
     assets.forEach(asset => {
+      newValues[asset.id] = parseFloat(asset.currentValue);
+      
       const currentValue = parseFloat(asset.currentValue);
       const lastValue = lastAssetValues[asset.id] || currentValue;
       
@@ -92,20 +102,37 @@ const AssetNotifications = () => {
     // Update last notification times in storage if needed
     if (shouldUpdateStorage) {
       setLastNotificationTime(updatedNotificationTimes);
-      localStorage.setItem('assetNotificationTimes', JSON.stringify(updatedNotificationTimes));
+      try {
+        localStorage.setItem('assetNotificationTimes', JSON.stringify(updatedNotificationTimes));
+      } catch (e) {
+        console.error('Error saving notification times to localStorage:', e);
+      }
     }
     
-    // Update stored asset values
-    const newValues = {};
-    assets.forEach(asset => {
-      newValues[asset.id] = parseFloat(asset.currentValue);
-    });
-    setLastAssetValues(newValues);
-    localStorage.setItem('lastAssetValues', JSON.stringify(newValues));
-  }, [assets]);
+    // Only update stored asset values if there are actual changes
+    if (JSON.stringify(newValues) !== JSON.stringify(lastAssetValues)) {
+      setLastAssetValues(newValues);
+      try {
+        localStorage.setItem('lastAssetValues', JSON.stringify(newValues));
+      } catch (e) {
+        console.error('Error saving asset values to localStorage:', e);
+      }
+    }
+    
+    processingRef.current = false;
+  }, [assets, lastAssetValues, lastNotificationTime]);
+  // Use the checkSignificantChanges function with assets as the dependency
+  useEffect(() => {
+    // Apply throttling to avoid excessive processing
+    const throttleTimeout = setTimeout(() => {
+      checkSignificantChanges();
+    }, 500);
+    
+    return () => clearTimeout(throttleTimeout);
+  }, [assets, checkSignificantChanges]);
 
   // The component doesn't render anything
   return null;
 };
 
-export default AssetNotifications;
+export default React.memo(AssetNotifications);

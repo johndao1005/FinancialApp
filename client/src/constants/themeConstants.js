@@ -16,6 +16,15 @@ export const PRIMARY_COLORS = {
 };
 
 /**
+ * Theme settings (same as PRIMARY_COLORS.MAIN for primary color)
+ * @deprecated Use PRIMARY_COLORS instead
+ */
+export const THEME = {
+  PRIMARY_COLOR: PRIMARY_COLORS.MAIN,
+  BORDER_RADIUS: 6
+};
+
+/**
  * Status color palette
  */
 export const STATUS_COLORS = {

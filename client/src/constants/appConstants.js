@@ -39,34 +39,3 @@ export const LANGUAGES = [
   { value: 'zh', label: 'Chinese' },
   { value: 'ja', label: 'Japanese' }
 ];
-
-/**
- * API endpoints
- */
-export const API_ENDPOINTS = {
-  AUTH: {
-    LOGIN: '/api/auth/login',
-    REGISTER: '/api/auth/register',
-    VERIFY: '/api/auth/verify'
-  },
-  USER: {
-    PROFILE: '/api/users/profile',
-    PASSWORD: '/api/users/password'
-  },
-  TRANSACTIONS: {
-    BASE: '/api/transactions',
-    UPLOAD: '/api/transactions/upload',
-    ANALYTICS: '/api/transactions/analytics'
-  },
-  CATEGORIES: '/api/categories',
-  BUDGETS: '/api/budgets',
-  GOALS: '/api/goals'
-};
-
-/**
- * Theme settings
- */
-export const THEME = {
-  PRIMARY_COLOR: '#1677ff',
-  BORDER_RADIUS: 6
-};

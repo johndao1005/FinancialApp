@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
-import AddAssetDialog from '../../components/Assets/AddAssetDialog';
+import AddAssetDialog from '../../pages/Assets/component/AddAssetDialog';
 import { TabPanel } from '../../constants/assetConstants';
 import { 
   AssetsStats, 

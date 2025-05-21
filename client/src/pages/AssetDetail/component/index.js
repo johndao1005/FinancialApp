@@ -11,3 +11,5 @@ export { default as AssetDetails } from './AssetDetails';
 export { default as AssetValueHistory } from './AssetValueHistory';
 export { default as AssetEditDialog } from './AssetEditDialog';
 export { default as AssetTransactionDialog } from './AssetTransactionDialog';
+export { default as ValuationChart } from './ValuationChart';
+export { default as ValuationUpdateDialog } from './ValuationUpdateDialog';

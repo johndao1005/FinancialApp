@@ -8,7 +8,7 @@
  * 4. Visual indication of the current active page
  * 5. Quick transaction entry button for adding transactions from anywhere
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Layout, Menu, Button, Avatar, Dropdown, Space } from 'antd';

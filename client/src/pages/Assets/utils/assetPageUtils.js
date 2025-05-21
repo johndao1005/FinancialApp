@@ -85,11 +85,12 @@ export const formatDate = (dateString, options = {}) => {
 };
 
 /**
- * Prepare chart data for history visualization
- * @param {Array} valueHistory - Array of historical values
- * @returns {Object|null} Chart data and options, or null if no data
+ * @deprecated - Use the prepareHistoryChart function in AssetValueHistory component instead
+ * This function is kept for backward compatibility and will be removed in future versions
  */
 export const prepareHistoryChart = (valueHistory) => {
+  console.warn('prepareHistoryChart has been moved to the AssetValueHistory component and will be removed from assetPageUtils in a future version');
+  
   if (!valueHistory || valueHistory.length === 0) {
     return null;
   }

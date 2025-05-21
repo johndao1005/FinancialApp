@@ -34,11 +34,10 @@ import {
   AssetDetailHeader,
   AssetDetails,
   AssetValueHistory,
-  AssetEditDialog,
-  AssetTransactionDialog
+  AssetEditDialog,  AssetTransactionDialog
 } from './component';
 import { calculateAssetMetrics } from './utils/assetPageUtils';
-import ValuationUpdateDialog from '../../components/Assets/ValuationUpdateDialog';
+import { ValuationUpdateDialog } from '../AssetDetail/component';
 
 // Register ChartJS components
 import {

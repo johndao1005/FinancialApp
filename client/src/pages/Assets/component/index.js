@@ -16,3 +16,7 @@ export {
   AssetEditDialog, 
   AssetTransactionDialog 
 } from '../../AssetDetail/component';
+export { default as AddAssetDialog } from './AddAssetDialog';
+export { default as NetWorthChart } from './NetWorthChart';
+export { default as PortfolioPerformance } from './PortfolioPerformance';
+export { default as AssetAllocationChart } from './AssetAllocationChart';

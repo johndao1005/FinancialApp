@@ -9,10 +9,10 @@ import { Box, Paper, Tabs, Tab, CircularProgress, Typography, Button } from '@mu
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AddIcon from '@mui/icons-material/Add';
 import { TabPanel } from '../../../constants/assetConstants';
-import AssetList from '../../../components/Assets/AssetList';
-import NetWorthChart from '../../../components/Assets/NetWorthChart';
-import AssetAllocationChart from '../../../components/Assets/AssetAllocationChart';
-import PortfolioPerformance from '../../../components/Assets/PortfolioPerformance';
+import AssetList from '../../../pages/Assets/component/AssetList';
+import NetWorthChart from '../../../pages/Assets/component/NetWorthChart';
+import AssetAllocationChart from '../../../pages/Assets/component/AssetAllocationChart';
+import PortfolioPerformance from '../../../pages/Assets/component/PortfolioPerformance';
 import AssetsList from './AssetsList';
 
 const AssetsTabs = ({

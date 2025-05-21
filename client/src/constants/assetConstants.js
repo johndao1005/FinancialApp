@@ -11,6 +11,17 @@ import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
 import { Box } from '@mui/material';
 
 /**
+ * Period options for asset history charts
+ */
+export const ASSET_PERIOD_OPTIONS = [
+  { value: '1m', label: '1M' },
+  { value: '3m', label: '3M' },
+  { value: '6m', label: '6M' },
+  { value: '1y', label: '1Y' },
+  { value: 'all', label: 'All' }
+];
+
+/**
  * Get human-readable asset type name from asset type code
  * @param {string} type - The asset type code
  * @returns {string} Human-readable asset type name

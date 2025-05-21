@@ -18,7 +18,7 @@ import {
   Legend,
   Filler
 } from 'chart.js';
-import { generateValuationProjection, formatCurrency } from '../../utils/assetUtils';
+import { generateValuationProjection, formatCurrency } from '../../../utils/assetUtils';
 
 // Register ChartJS components
 ChartJS.register(

@@ -12,7 +12,7 @@
  * Props:
  * - onSuccess: Callback function to execute after successfully adding a transaction
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { 
   Button, 
@@ -43,11 +43,10 @@ const QuickTransactionEntry = ({ onSuccess }) => {
   const [isExpense, setIsExpense] = useState(true);
   const [isRecurring, setIsRecurring] = useState(false);
   const [loading, setLoading] = useState(false);
-  
-  const dispatch = useDispatch();
+    const dispatch = useDispatch();
 
-  // Common expense categories
-  const expenseCategories = [
+  // Common expense categories - memoized to prevent recreation on each render
+  const expenseCategories = useMemo(() => [
     'Uncategorized',
     'Dining', 
     'Groceries',
@@ -61,10 +60,10 @@ const QuickTransactionEntry = ({ onSuccess }) => {
     'Education',
     'Travel',
     'Other'
-  ];
+  ], []);
 
-  // Common income categories
-  const incomeCategories = [
+  // Common income categories - memoized to prevent recreation on each render
+  const incomeCategories = useMemo(() => [
     'Uncategorized',
     'Salary', 
     'Freelance', 
@@ -72,16 +71,15 @@ const QuickTransactionEntry = ({ onSuccess }) => {
     'Gifts', 
     'Refunds',
     'Other'
-  ];
-
-  const showModal = () => {
+  ], []);
+  const showModal = useCallback(() => {
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setIsModalOpen(false);
     form.resetFields();
-  };
+  }, [form]);
 
   /**
    * Handle form submission to create a new transaction
@@ -95,8 +93,7 @@ const QuickTransactionEntry = ({ onSuccess }) => {
    * 6. Calls the onSuccess callback if provided
    * 
    * @param {Object} values - Form values from Ant Design form
-   */
-  const handleSubmit = async (values) => {
+   */  const handleSubmit = useCallback(async (values) => {
     setLoading(true);
     
     try {
@@ -126,7 +123,7 @@ const QuickTransactionEntry = ({ onSuccess }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch, isExpense, onSuccess, form]);
 
   return (
     <>
@@ -268,4 +265,5 @@ const QuickTransactionEntry = ({ onSuccess }) => {
   );
 };
 
-export default QuickTransactionEntry;
+// Export as memoized component to prevent unnecessary re-renders
+export default React.memo(QuickTransactionEntry);

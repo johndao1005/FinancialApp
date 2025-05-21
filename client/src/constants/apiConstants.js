@@ -17,7 +17,8 @@ export const API_BASE = '/api';
 export const AUTH_API = {
   LOGIN: `${API_BASE}/auth/login`,
   REGISTER: `${API_BASE}/auth/register`,
-  LOGOUT: `${API_BASE}/auth/logout`
+  LOGOUT: `${API_BASE}/auth/logout`,
+  VERIFY: `${API_BASE}/auth/verify`
 };
 
 /**
@@ -66,4 +67,28 @@ export const GOAL_API = {
   BY_ID: (id) => `${API_BASE}/goals/${id}`,
   CONTRIBUTIONS: (goalId) => `${API_BASE}/goals/${goalId}/contributions`,
   ADD_CONTRIBUTION: (goalId) => `${API_BASE}/goals/${goalId}/contribute`
+};
+
+/**
+ * Deprecated: API_ENDPOINTS (use the more specific constants above)
+ * Kept for backward compatibility
+ */
+export const API_ENDPOINTS = {
+  AUTH: {
+    LOGIN: `${API_BASE}/auth/login`,
+    REGISTER: `${API_BASE}/auth/register`,
+    VERIFY: `${API_BASE}/auth/verify`
+  },
+  USER: {
+    PROFILE: `${API_BASE}/users/profile`,
+    PASSWORD: `${API_BASE}/users/password`
+  },
+  TRANSACTIONS: {
+    BASE: `${API_BASE}/transactions`,
+    UPLOAD: `${API_BASE}/transactions/upload`,
+    ANALYTICS: `${API_BASE}/transactions/analytics`
+  },
+  CATEGORIES: `${API_BASE}/categories`,
+  BUDGETS: `${API_BASE}/budgets`,
+  GOALS: `${API_BASE}/goals`
 };

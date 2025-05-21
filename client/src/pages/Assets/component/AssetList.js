@@ -32,6 +32,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
+import { getAssetTypeName, getTrendIcon } from '../../../constants/assetConstants';
 
 // Map asset types to icons
 const getAssetTypeIcon = (type) => {
@@ -46,34 +47,6 @@ const getAssetTypeIcon = (type) => {
       return <AccountBalanceIcon />;
     default:
       return <HelpOutlineIcon />;
-  }
-};
-
-// Get human-readable asset type name
-const getAssetTypeName = (type) => {
-  switch (type) {
-    case 'property':
-      return 'Real Estate';
-    case 'stock':
-      return 'Stocks & Shares';
-    case 'crypto':
-      return 'Cryptocurrency';
-    case 'term_deposit':
-      return 'Term Deposits & Savings';
-    default:
-      return 'Other Assets';
-  }
-};
-
-// Get trend icon based on performance
-const getTrendIcon = (initialValue, currentValue) => {
-  const difference = currentValue - initialValue;
-  if (difference > 0) {
-    return <TrendingUpIcon color="success" fontSize="small" />;
-  } else if (difference < 0) {
-    return <TrendingDownIcon color="error" fontSize="small" />;
-  } else {
-    return <TrendingFlatIcon color="action" fontSize="small" />;
   }
 };
 

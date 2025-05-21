@@ -23,7 +23,6 @@ import {
 import { fetchTransactions } from '../../redux/slices/transactionSlice';
 import { fetchAssets, fetchNetWorth } from '../../redux/slices/assetSlice';
 import QuickTransactionEntry from '../../components/QuickTransactionEntry';
-import AssetSummary from '../../components/Assets/AssetSummary';
 
 // Import component modules
 import SummaryCards from './component/SummaryCards';
@@ -31,6 +30,7 @@ import MonthlyOverviewChart from './component/MonthlyOverviewChart';
 import CategoryPieChart from './component/CategoryPieChart';
 import RecentTransactionsTable from './component/RecentTransactionsTable';
 import TimeFrameSelector from './component/TimeFrameSelector';
+import AssetSummary from './component/AssetSummary';
 
 const { Title } = Typography;
 
