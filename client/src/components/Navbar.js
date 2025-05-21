@@ -34,7 +34,6 @@ const Navbar = () => {
   // UI state
   const [collapsed, setCollapsed] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= BREAKPOINTS.MD);
-
   /**
    * Handle window resize events to adjust for mobile/desktop layouts
    */
@@ -43,38 +42,46 @@ const Navbar = () => {
       setIsMobile(window.innerWidth <= BREAKPOINTS.MD);
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    // Add debouncing to avoid excessive rendering on resize
+    let timeoutId;
+    const debouncedResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleResize, 150);
+    };
+
+    window.addEventListener('resize', debouncedResize);
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   /**
    * Handle user logout
    * Dispatches logout action and redirects to login page
-   */
-  const handleLogout = () => {
+   */  const handleLogout = useCallback(() => {
     dispatch(logout());
     navigate('/login');
-  };
+  }, [dispatch, navigate]);
 
   /**
    * Handle successful transaction creation
    * Navigates to transactions page to show the newly added transaction
    */
-  const handleTransactionSuccess = () => {
+  const handleTransactionSuccess = useCallback(() => {
     navigate('/transactions');
-  };
-
-  // Generate navigation items from constants
-  const items = Object.values(ROUTES)
+  }, [navigate]);
+  // Generate navigation items from constants - memoize to prevent recalculation
+  const items = useMemo(() => Object.values(ROUTES)
     .filter(route => route.path !== '/login' && route.path !== '/register')
     .map(route => ({
       key: route.path,
       icon: <route.icon />,
       label: <Link to={route.path}>{route.name}</Link>,
-    }));
+    })), []);
 
-  // Generate user dropdown items from constants
-  const userDropdownItems = [
+  // Generate user dropdown items from constants - memoize to prevent recalculation 
+  const userDropdownItems = useMemo(() => [
     {
       key: USER_MENU_ITEMS.PROFILE.key,
       icon: <USER_MENU_ITEMS.PROFILE.icon />,
@@ -85,7 +92,7 @@ const Navbar = () => {
       icon: <USER_MENU_ITEMS.LOGOUT.icon />,
       label: <span onClick={handleLogout}>{USER_MENU_ITEMS.LOGOUT.label}</span>,
     },
-  ];
+  ], [handleLogout]);
 
   return (
     <Layout>
@@ -175,4 +182,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default React.memo(Navbar);
