@@ -19,11 +19,10 @@ import {
   DollarOutlined,
   LineChartOutlined,
   BankOutlined,
-  HomeOutlined,
-  CarOutlined,
+  HomeOutlined,  CarOutlined,
   TrophyOutlined
 } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 
@@ -63,12 +62,11 @@ const GoalCards = ({
             Math.round((goal.currentAmount / goal.targetAmount) * 100), 
             100
           );
-          
-          // Determine status color
+            // Determine status color
           let statusColor = 'blue';
           if (progressPercent === 100) {
             statusColor = 'green';
-          } else if (goal.targetDate && moment(goal.targetDate).isBefore(moment())) {
+          } else if (goal.targetDate && dayjs(goal.targetDate).isBefore(dayjs())) {
             statusColor = 'red';
           }
 
@@ -154,12 +152,11 @@ const GoalCards = ({
                         <Text type="secondary">
                           <ClockCircleOutlined /> Target Date
                         </Text>
-                        <div>
-                          <Text 
+                        <div>                          <Text 
                             strong
-                            type={moment(goal.targetDate).isBefore(moment()) ? 'danger' : ''}
+                            type={dayjs(goal.targetDate).isBefore(dayjs()) ? 'danger' : ''}
                           >
-                            {moment(goal.targetDate).format('MMM D, YYYY')}
+                            {dayjs(goal.targetDate).format('MMM D, YYYY')}
                           </Text>
                         </div>
                       </Col>

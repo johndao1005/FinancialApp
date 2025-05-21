@@ -15,7 +15,7 @@
  */
 import { createTransaction } from '../redux/slices/transactionSlice';
 import { store } from '../redux/store';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 /**
  * Creates and dispatches a new transaction with simplified formatting.
@@ -24,17 +24,16 @@ import moment from 'moment';
  * dispatching to the Redux store. It automatically converts moment objects
  * to properly formatted date strings and ensures recurring transaction
  * fields are handled correctly.
- * 
- * @param {Object} transactionData - Transaction data object
+ *  * @param {Object} transactionData - Transaction data object
  * @param {number|string} transactionData.amount - Transaction amount (negative for expenses, positive for income)
  * @param {string} [transactionData.description] - Transaction description (optional)
- * @param {string|Object} transactionData.date - Transaction date (string in YYYY-MM-DD format or moment object)
+ * @param {string|Object} transactionData.date - Transaction date (string in YYYY-MM-DD format or dayjs object)
  * @param {string} [transactionData.categoryId] - Category ID (optional)
  * @param {string} [transactionData.merchant] - Merchant name (optional)
  * @param {string} [transactionData.notes] - Additional notes (optional)
  * @param {boolean} [transactionData.isRecurring] - Whether this is a recurring transaction (optional)
  * @param {string} [transactionData.recurringFrequency] - Frequency of recurring payment (daily, weekly, biweekly, monthly, quarterly, annually) (optional)
- * @param {string|Object} [transactionData.recurringEndDate] - End date for recurring payments (string in YYYY-MM-DD format or moment object) (optional)
+ * @param {string|Object} [transactionData.recurringEndDate] - End date for recurring payments (string in YYYY-MM-DD format or dayjs object) (optional)
  * @returns {Promise} - Promise that resolves when transaction is added
  * 
  * @example
@@ -57,25 +56,24 @@ import moment from 'moment';
  *   amount: -9.99,
  *   description: 'Monthly subscription',
  *   date: moment(),
- *   categoryId: 'entertainment-category-id',
- *   isRecurring: true,
+ *   categoryId: 'entertainment-category-id', *   isRecurring: true,
  *   recurringFrequency: 'monthly', 
- *   recurringEndDate: moment().add(1, 'year')
+ *   recurringEndDate: dayjs().add(1, 'year')
  * });
  */
 export const quickAddTransaction = async (transactionData) => {
-  // Format the dates if they're moment objects
+  // Format the dates if they're dayjs objects
   const formattedData = {
     ...transactionData,
-    // Convert moment date object to YYYY-MM-DD string format if needed
-    date: transactionData.date instanceof moment 
+    // Convert dayjs date object to YYYY-MM-DD string format if needed
+    date: transactionData.date && typeof transactionData.date.format === 'function'
       ? transactionData.date.format('YYYY-MM-DD') 
       : transactionData.date
   };
   
   // Format recurring end date if it exists
   if (formattedData.isRecurring && formattedData.recurringEndDate) {
-    formattedData.recurringEndDate = formattedData.recurringEndDate instanceof moment
+    formattedData.recurringEndDate = formattedData.recurringEndDate && typeof formattedData.recurringEndDate.format === 'function'
       ? formattedData.recurringEndDate.format('YYYY-MM-DD')
       : formattedData.recurringEndDate;
   }

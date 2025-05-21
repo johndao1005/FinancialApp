@@ -176,12 +176,11 @@ const QuickTransactionEntry = ({ onSuccess }) => {
           </Form.Item>
           
           {/* Transaction Date */}
-          <Form.Item
-            name="date"
+          <Form.Item            name="date"
             label="Date"
             rules={[{ required: true, message: 'Please select a date!' }]}
           >
-            <DatePicker style={{ width: '100%' }} />
+            <DatePicker style={{ width: '100%' }} inputReadOnly={true} />
           </Form.Item>
           
           {/* Transaction Amount */}
@@ -248,11 +247,10 @@ const QuickTransactionEntry = ({ onSuccess }) => {
           {/* End Date for Recurring Transactions */}
           {isRecurring && (
             <Form.Item
-              name="recurringEndDate"
-              label="End Date (Optional)"
+              name="recurringEndDate"              label="End Date (Optional)"
               tooltip="Leave empty for indefinite recurring transactions"
             >
-              <DatePicker style={{ width: '100%' }} />
+              <DatePicker style={{ width: '100%' }} inputReadOnly={true} />
             </Form.Item>
           )}
           

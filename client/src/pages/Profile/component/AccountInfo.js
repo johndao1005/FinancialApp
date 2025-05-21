@@ -8,7 +8,7 @@ import {
   Typography
 } from 'antd';
 import { CrownOutlined } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const { Text } = Typography;
 
@@ -39,14 +39,12 @@ const AccountInfo = ({ user }) => {
               </>
             )}
           </Space>
-        </Descriptions.Item>
-
-        <Descriptions.Item label="Member Since" span={3}>
-          {user.createdAt ? moment(user.createdAt).format('MMMM D, YYYY') : 'N/A'}
+        </Descriptions.Item>        <Descriptions.Item label="Member Since" span={3}>
+          {user.createdAt ? dayjs(user.createdAt).format('MMMM D, YYYY') : 'N/A'}
         </Descriptions.Item>
 
         <Descriptions.Item label="Last Login" span={3}>
-          {user.lastLogin ? moment(user.lastLogin).format('MMMM D, YYYY [at] h:mm A') : 'N/A'}
+          {user.lastLogin ? dayjs(user.lastLogin).format('MMMM D, YYYY [at] h:mm A') : 'N/A'}
         </Descriptions.Item>
 
         <Descriptions.Item label="Account Status" span={3}>

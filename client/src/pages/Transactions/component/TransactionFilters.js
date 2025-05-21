@@ -96,10 +96,10 @@ const TransactionFilters = ({
       >
         <Row gutter={16}>
           <Col xs={24} sm={24} md={12} lg={10}>
-            <Form.Item name="dateRange" label="Date Range">
-              <RangePicker 
+            <Form.Item name="dateRange" label="Date Range">              <RangePicker 
                 style={{ width: '100%' }} 
                 placeholder={['Start Date', 'End Date']}
+                inputReadOnly={true}
               />
             </Form.Item>
           </Col>

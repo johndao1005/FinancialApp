@@ -2,14 +2,13 @@ import React from 'react';
 import { 
   Form, 
   Input, 
-  Select, 
-  DatePicker, 
+  Select,   DatePicker, 
   InputNumber,
   Button, 
   Row, 
   Col
 } from 'antd';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -87,11 +86,10 @@ const GoalForm = ({ form, categories, onFinish, onCancel }) => {
         <Col span={12}>
           <Form.Item
             name="targetDate"
-            label="Target Date"
-          >
+            label="Target Date"          >
             <DatePicker 
               style={{ width: '100%' }}
-              disabledDate={(current) => current && current < moment().startOf('day')}
+              disabledDate={(current) => current && current < dayjs().startOf('day')}
             />
           </Form.Item>
         </Col>

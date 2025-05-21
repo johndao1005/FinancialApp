@@ -22,7 +22,7 @@ import {
   message
 } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 // Import components
 import GoalForm from './component/GoalForm';
@@ -63,10 +63,9 @@ const Goals = () => {
       setEditingGoalId(goal.id);
       form.setFieldsValue({
         name: goal.name,
-        description: goal.description,
-        targetAmount: goal.targetAmount,
+        description: goal.description,        targetAmount: goal.targetAmount,
         currentAmount: goal.currentAmount,
-        targetDate: goal.targetDate ? moment(goal.targetDate) : null,
+        targetDate: goal.targetDate ? dayjs(goal.targetDate) : null,
         type: goal.type,
         categoryId: goal.categoryId,
         priority: goal.priority,
@@ -93,10 +92,9 @@ const Goals = () => {
   };
   
   const showContributionModal = (goalId) => {
-    setSelectedGoalId(goalId);
-    contributionForm.resetFields();
+    setSelectedGoalId(goalId);    contributionForm.resetFields();
     contributionForm.setFieldsValue({
-      date: moment(),
+      date: dayjs(),
     });
     setContributionModalVisible(true);
   };

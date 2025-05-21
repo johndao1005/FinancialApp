@@ -30,11 +30,13 @@ import {
 import { 
   PlusOutlined, 
   EditOutlined, 
-  DeleteOutlined,
-  DollarOutlined,
+  DeleteOutlined,  DollarOutlined,
   CalendarOutlined
 } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -69,18 +71,16 @@ const Budgets = () => {
         name: budget.name,
         amount: budget.amount,
         period: budget.period,
-        categoryId: budget.categoryId,
-        dateRange: budget.endDate 
-          ? [moment(budget.startDate), moment(budget.endDate)]
-          : [moment(budget.startDate), null],
+        categoryId: budget.categoryId,        dateRange: budget.endDate 
+          ? [dayjs(budget.startDate), dayjs(budget.endDate)]
+          : [dayjs(budget.startDate), null],
         notes: budget.notes
       });
     } else {
       setEditingBudgetId(null);
       form.resetFields();
-      form.setFieldsValue({
-        period: 'monthly',
-        dateRange: [moment(), null]
+      form.setFieldsValue({        period: 'monthly',
+        dateRange: [dayjs(), null]
       });
     }
     setModalVisible(true);
@@ -163,17 +163,15 @@ const Budgets = () => {
       key: 'period',
       render: (period) => period.charAt(0).toUpperCase() + period.slice(1)
     },
-    {
-      title: 'Start Date',
+    {      title: 'Start Date',
       dataIndex: 'startDate',
       key: 'startDate',
-      render: (date) => moment(date).format('MMM DD, YYYY')
+      render: (date) => dayjs(date).format('MMM DD, YYYY')
     },
-    {
-      title: 'End Date',
+    {      title: 'End Date',
       dataIndex: 'endDate',
       key: 'endDate',
-      render: (date) => date ? moment(date).format('MMM DD, YYYY') : 'Ongoing'
+      render: (date) => date ? dayjs(date).format('MMM DD, YYYY') : 'Ongoing'
     },
     {
       title: 'Actions',
@@ -290,11 +288,11 @@ const Budgets = () => {
             name="dateRange"
             label="Date Range"
             rules={[{ required: true, message: 'Please select a date range' }]}
-          >
-            <RangePicker 
+          >            <RangePicker 
               style={{ width: '100%' }}
               format="YYYY-MM-DD"
               allowEmpty={[false, true]}
+              inputReadOnly={true}
             />
           </Form.Item>
           
@@ -404,11 +402,10 @@ const Budgets = () => {
                 rowKey="id"
                 pagination={false}
                 columns={[
-                  {
-                    title: 'Date',
+                  {                    title: 'Date',
                     dataIndex: 'date',
                     key: 'date',
-                    render: (date) => moment(date).format('MMM DD, YYYY')
+                    render: (date) => dayjs(date).format('MMM DD, YYYY')
                   },
                   {
                     title: 'Description',

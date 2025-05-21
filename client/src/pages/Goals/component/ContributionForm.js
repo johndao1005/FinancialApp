@@ -51,6 +51,7 @@ const ContributionForm = ({ form, onFinish, onCancel }) => {
           >            <DatePicker 
               style={{ width: '100%' }}
               disabledDate={(current) => current && current > dayjs().endOf('day')}
+              inputReadOnly={true}
             />
           </Form.Item>
         </Col>

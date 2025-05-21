@@ -17,10 +17,9 @@ import {
 import { 
   DeleteOutlined,
   DollarOutlined,
-  CalendarOutlined,
-  BankOutlined
+  CalendarOutlined,  BankOutlined
 } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -30,12 +29,11 @@ const GoalDetails = ({
   onDeleteContribution 
 }) => {
   // Contribution columns for the table
-  const contributionColumns = [
-    {
+  const contributionColumns = [    {
       title: 'Date',
       dataIndex: 'date',
       key: 'date',
-      render: (date) => moment(date).format('MMM D, YYYY')
+      render: (date) => dayjs(date).format('MMM D, YYYY')
     },
     {
       title: 'Amount',
@@ -90,8 +88,8 @@ const GoalDetails = ({
   let isOverdue = false;
   
   if (currentGoal.targetDate) {
-    const targetDate = moment(currentGoal.targetDate);
-    const today = moment();
+    const targetDate = dayjs(currentGoal.targetDate);
+    const today = dayjs();
     daysRemaining = targetDate.diff(today, 'days');
     isOverdue = daysRemaining < 0;
   }
@@ -99,7 +97,7 @@ const GoalDetails = ({
   // Sort contributions by date (newest first)
   const sortedContributions = currentGoal.contributions 
     ? [...currentGoal.contributions].sort((a, b) => 
-        moment(b.date).valueOf() - moment(a.date).valueOf()
+        dayjs(b.date).valueOf() - dayjs(a.date).valueOf()
       )
     : [];
   
@@ -155,10 +153,9 @@ const GoalDetails = ({
                   </Card>
                   
                   {currentGoal.targetDate && (
-                    <Card size="small">
-                      <Statistic 
+                    <Card size="small">                      <Statistic 
                         title="Target Date" 
-                        value={moment(currentGoal.targetDate).format('MMM D, YYYY')}
+                        value={dayjs(currentGoal.targetDate).format('MMM D, YYYY')}
                         prefix={<CalendarOutlined />}
                         valueStyle={{ color: isOverdue ? '#f5222d' : 'inherit' }}
                       />

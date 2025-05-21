@@ -32,11 +32,11 @@ import {
   SearchOutlined,
   EditOutlined,
   DeleteOutlined,
-  FilterOutlined,
-  ReloadOutlined,
+  FilterOutlined,  ReloadOutlined,
   CalendarOutlined
 } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { 
   fetchTransactions, 
   deleteTransaction,
@@ -48,6 +48,9 @@ import TopMerchantsChart from '../components/TopMerchantsChart';
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
+
+// Extend dayjs with plugins
+dayjs.extend(customParseFormat);
 
 // This file has been backed up before deletion
 // It was located at c:\Users\JohnDao\Downloads\FinancialApp\client\src\pages\Transactions.js

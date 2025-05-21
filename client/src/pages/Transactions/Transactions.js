@@ -49,11 +49,10 @@ import OnboardingTooltip from '../../components/OnboardingTooltip';
 const { Title } = Typography;
 
 const Transactions = () => {
-  const dispatch = useDispatch();
-  // Redux state selectors
+  const dispatch = useDispatch();  // Redux state selectors
   const { transactions, loading, totalPages, currentPage } = useSelector(state => state.transactions);
   const { categories } = useSelector(state => state.categories);
-  const { loading: categoryOverrideLoading, generatedRules } = useSelector(state => state.categoryOverride);
+  const { loading: categoryOverrideLoading, generatedRules } = useSelector(state => state.categoryOverrides);
 
   // Pagination and filtering state
   const [page, setPage] = useState(1);
