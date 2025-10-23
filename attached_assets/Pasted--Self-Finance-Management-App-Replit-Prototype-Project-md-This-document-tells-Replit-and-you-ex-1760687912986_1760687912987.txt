@@ -1,0 +1,721 @@
+# Self Finance Management App — Replit Prototype Project.md
+
+This document tells Replit (and you) exactly what to scaffold so you can run a working prototype online, then take it offline and continue locally with Docker + Postgres. The Replit build uses **Python + FastAPI + SQLite** to keep things simple. Frontend is optional for day 1 (API-first), but a minimal Next.js client scaffold is included below if you want a UI right away.
+
+---
+
+## ✅ What you’ll have at the end
+
+* A running **FastAPI** backend on Replit with **SQLite** storage
+* Core models: users, accounts, transactions, categories, rules, budgets
+* CSV ingest endpoint with mapping YAMLs
+* Rules-based auto-categorisation (regex/ilike)
+* Basic summaries endpoints (net worth, budget)
+* Minimal OpenAPI docs at `/docs`
+* Optional **Next.js** client (same Repl) that hits the API
+* Exportable code ready for **Docker + Postgres** offline
+
+---
+
+## 🗂️ File tree (target)
+
+```
+.
+├── .replit
+├── replit.nix
+├── README.md
+├── requirements.txt
+├── app/
+│   ├── main.py
+│   ├── db.py
+│   ├── config.py
+│   ├── models.py
+│   ├── schemas.py
+│   ├── utils/
+│   │   ├── hashing.py
+│   │   ├── rules.py
+│   │   └── csv_mapping.py
+│   ├── routers/
+│   │   ├── health.py
+│   │   ├── accounts.py
+│   │   ├── transactions.py
+│   │   ├── categories.py
+│   │   ├── rules.py
+│   │   ├── budgets.py
+│   │   └── networth.py
+│   └── mappings/
+│       └── sample_bank.yml
+├── data/
+│   └── sample.csv
+├── web/   (optional frontend)
+│   ├── package.json
+│   ├── next.config.mjs
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── layout.tsx
+│   │   │   └── page.tsx
+│   │   └── lib/api.ts
+│   └── tsconfig.json
+├── Dockerfile
+├── docker-compose.yml
+└── Makefile
+```
+
+---
+
+## ▶️ Replit config
+
+**.replit**
+
+```ini
+run = "bash start.sh"
+
+[env]
+PORT = "8000"
+PYTHONUNBUFFERED = "1"
+DATABASE_URL = "sqlite+aiosqlite:///./data/app.db"
+```
+
+**replit.nix**
+
+```nix
+{ pkgs }: {
+  deps = [
+    pkgs.python311Full
+    pkgs.python311Packages.pip
+    pkgs.nodejs_20
+    pkgs.sqlite
+    pkgs.curl
+    pkgs.gnumake
+  ];
+}
+```
+
+**start.sh** (make it executable)
+
+```bash
+#!/usr/bin/env bash
+set -e
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+# Optional: install web deps if present
+if [ -f web/package.json ]; then
+  cd web && npm i && cd -
+fi
+# Start API
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+**requirements.txt**
+
+```
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+sqlmodel==0.0.22
+SQLAlchemy==2.0.35
+aiosqlite==0.20.0
+pydantic==2.9.2
+python-multipart==0.0.9
+python-dateutil==2.9.0.post0
+PyYAML==6.0.2
+```
+
+---
+
+## 🔐 Environment variables
+
+* `DATABASE_URL` — default set to SQLite in `.replit`. For Postgres offline, use: `postgresql+psycopg://user:pass@db:5432/app` and add `psycopg[binary]` to requirements.
+
+---
+
+## 🧱 Backend skeleton (FastAPI)
+
+**app/config.py**
+
+```python
+import os
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./data/app.db")
+```
+
+**app/db.py**
+
+```python
+from sqlmodel import SQLModel
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import sessionmaker
+from .config import DATABASE_URL
+
+engine = create_async_engine(DATABASE_URL, echo=False, future=True)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
+
+async def get_session():
+    async with async_session() as session:
+        yield session
+```
+
+**app/models.py**
+
+```python
+from sqlmodel import SQLModel, Field, Relationship
+from typing import Optional
+from datetime import datetime
+import uuid
+
+class Account(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(index=True)
+    name: str
+    provider: str = "manual"
+    account_type: str
+    currency: str = "NZD"
+
+class Category(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(index=True)
+    name: str
+    parent_id: Optional[uuid.UUID] = Field(default=None, foreign_key="category.id")
+    is_income: bool = False
+    is_sinking: bool = False
+
+class Transaction(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(index=True)
+    account_id: uuid.UUID = Field(foreign_key="account.id")
+    posted_at: datetime
+    amount: float
+    currency: str = "NZD"
+    description_raw: str
+    merchant: Optional[str] = None
+    memo: Optional[str] = None
+    import_id: Optional[str] = None
+    hash: Optional[str] = Field(default=None, index=True, unique=True)
+    is_transfer: bool = False
+    is_pending: bool = False
+
+class Rule(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(index=True)
+    pattern: str
+    field: str = "description"  # description | merchant
+    category_id: uuid.UUID = Field(foreign_key="category.id")
+    priority: int = 100
+    active: bool = True
+
+class Budget(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(index=True)
+    period: str  # YYYY-MM
+    category_id: uuid.UUID = Field(foreign_key="category.id")
+    amount: float
+```
+
+**app/schemas.py**
+
+```python
+from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
+
+class TxIn(BaseModel):
+    account_id: str
+    posted_at: datetime
+    amount: float
+    description_raw: str
+    merchant: Optional[str] = None
+    memo: Optional[str] = None
+```
+
+**app/utils/hashing.py**
+
+```python
+import hashlib
+
+def tx_hash(account_id: str, posted_at: str, amount: float, desc: str) -> str:
+    base = f"{account_id}|{posted_at}|{amount}|{desc.strip().lower()}"
+    return hashlib.sha1(base.encode()).hexdigest()
+```
+
+**app/utils/rules.py**
+
+```python
+import re
+from typing import Optional
+
+compiled_cache = {}
+
+def match_category(desc: str, rules: list[dict]) -> Optional[str]:
+    d = desc.lower()
+    for r in sorted(rules, key=lambda x: x.get("priority", 100)):
+        if not r.get("active", True):
+            continue
+        pat = r["pattern"]
+        if pat not in compiled_cache:
+            compiled_cache[pat] = re.compile(pat)
+        if compiled_cache[pat].search(d):
+            return r["category_id"]
+    return None
+```
+
+**app/utils/csv_mapping.py**
+
+```python
+from typing import Dict, Any
+from dateutil import parser
+
+def parse_row(row: Dict[str, str], mapping: Dict[str, Any]):
+    date_col = mapping["columns"]["date"]
+    desc_col = mapping["columns"]["description"]
+    amt_col = mapping["columns"]["amount"]
+    bal_col = mapping["columns"].get("balance")
+
+    posted_at = parser.parse(row[date_col])
+    amount = float(str(row[amt_col]).replace(",", ""))
+    desc = row[desc_col]
+    return posted_at, amount, desc
+```
+
+**app/routers/health.py**
+
+```python
+from fastapi import APIRouter
+router = APIRouter()
+
+@router.get("/health")
+async def health():
+    return {"ok": True}
+```
+
+**app/routers/transactions.py**
+
+```python
+from fastapi import APIRouter, UploadFile, Depends, HTTPException
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+import csv, io, yaml
+from ..db import get_session
+from ..models import Transaction
+from ..utils.hashing import tx_hash
+from ..utils.csv_mapping import parse_row
+
+router = APIRouter(prefix="/transactions", tags=["transactions"])
+
+@router.get("")
+async def list_tx(limit: int = 100, session: AsyncSession = Depends(get_session)):
+    res = await session.exec(select(Transaction).order_by(Transaction.posted_at.desc()).limit(limit))
+    return res.all()
+
+@router.post("/ingest/csv")
+async def ingest_csv(file: UploadFile, mapping_name: str = "sample_bank", account_id: str = "acc_demo", user_id: str = "user_demo", session: AsyncSession = Depends(get_session)):
+    content = await file.read()
+    reader = csv.DictReader(io.StringIO(content.decode("utf-8")))
+    with open(f"app/mappings/{mapping_name}.yml", "r") as f:
+        mapping = yaml.safe_load(f)
+    imported = 0
+    for row in reader:
+        posted_at, amount, desc = parse_row(row, mapping)
+        h = tx_hash(account_id, posted_at.isoformat(), amount, desc)
+        exists = await session.exec(select(Transaction).where(Transaction.hash == h))
+        if exists.first():
+            continue
+        tx = Transaction(user_id=user_id, account_id=account_id, posted_at=posted_at, amount=amount, description_raw=desc, hash=h)
+        session.add(tx)
+        imported += 1
+    await session.commit()
+    return {"imported": imported}
+```
+
+**app/routers/categories.py**
+
+```python
+from fastapi import APIRouter, Depends
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlmodel import select
+from ..db import get_session
+from ..models import Category
+
+router = APIRouter(prefix="/categories", tags=["categories"])
+
+@router.get("")
+async def list_categories(session: AsyncSession = Depends(get_session)):
+    res = await session.exec(select(Category))
+    return res.all()
+```
+
+**app/routers/rules.py**
+
+```python
+from fastapi import APIRouter, Depends
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlmodel import select
+from ..db import get_session
+from ..models import Rule
+
+router = APIRouter(prefix="/rules", tags=["rules"])
+
+@router.get("")
+async def list_rules(session: AsyncSession = Depends(get_session)):
+    res = await session.exec(select(Rule))
+    return res.all()
+```
+
+**app/routers/networth.py**
+
+```python
+from fastapi import APIRouter
+router = APIRouter(prefix="/networth", tags=["networth"])
+
+@router.get("/summary")
+async def summary():
+    # Placeholder: compute from accounts + transactions
+    return {"assets": 0, "liabilities": 0, "net_worth": 0}
+```
+
+**app/routers/budgets.py**
+
+```python
+from fastapi import APIRouter
+router = APIRouter(prefix="/budgets", tags=["budgets"])
+
+@router.get("/{period}")
+async def get_budget(period: str):
+    return {"period": period, "categories": []}
+```
+
+**app/main.py**
+
+```python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from .db import init_db
+from .routers import health, transactions, categories, rules, budgets, networth
+
+app = FastAPI(title="Self Finance App API", version="0.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.on_event("startup")
+async def on_startup():
+    await init_db()
+
+app.include_router(health.router)
+app.include_router(categories.router)
+app.include_router(rules.router)
+app.include_router(transactions.router)
+app.include_router(budgets.router)
+app.include_router(networth.router)
+```
+
+---
+
+## 🧪 Sample mapping & CSV
+
+**app/mappings/sample_bank.yml**
+
+```yaml
+bank: sample_bank
+columns:
+  date: "Date"
+  description: "Details"
+  amount: "Amount"
+formats:
+  date: "%d/%m/%Y"
+sign: "negative_is_spend"
+```
+
+**data/sample.csv**
+
+```csv
+Date,Details,Amount
+01/10/2025,NEW WORLD WELLINGTON,-57.90
+02/10/2025,Z ENERGY,-92.10
+03/10/2025,SALARY ACME LTD,3500.00
+```
+
+---
+
+## 🚀 How to run on Replit
+
+1. Create a new **Python (Nix)** Repl.
+2. Add the files above (or paste this Project.md to Replit AI and say: *“Create this project exactly as specified. Generate all missing files.”*)
+3. Ensure **start.sh** is executable (`chmod +x start.sh`).
+4. Click **Run**. Open **/docs** for the API UI.
+5. Test ingest: `POST /transactions/ingest/csv` with `multipart/form-data` file=`data/sample.csv`.
+
+### Quick test via curl (in Replit Shell)
+
+```bash
+curl -s -X POST -F "file=@data/sample.csv" \
+  "http://localhost:8000/transactions/ingest/csv?mapping_name=sample_bank&account_id=acc_demo&user_id=user_demo" | jq
+```
+
+---
+
+## (Optional) React + TypeScript + Redux (Vite) Frontend
+
+A tiny React TS app using **Redux Toolkit + RTK Query**. It can live in the same Repl under `web/`. Keep the API on port **8000** and run the web dev server on **5173** from a separate shell tab.
+
+**web/package.json**
+
+```json
+{
+  "name": "finance-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5173",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 5173"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.1.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8"
+  }
+}
+```
+
+**web/tsconfig.json**
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "baseUrl": "."
+  },
+  "include": ["src"]
+}
+```
+
+**web/vite.config.ts**
+
+```ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+export default defineConfig({ plugins: [react()] });
+```
+
+**web/index.html**
+
+```html
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finance Web</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+```
+
+**web/src/main.tsx**
+
+```tsx
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { store } from './store';
+import App from './App';
+
+createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>
+);
+```
+
+**web/src/store/index.ts**
+
+```ts
+import { configureStore } from '@reduxjs/toolkit';
+import { api } from './services/api';
+
+export const store = configureStore({
+  reducer: { [api.reducerPath]: api.reducer },
+  middleware: (gDM) => gDM().concat(api.middleware)
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+```
+
+**web/src/store/services/api.ts**
+
+```ts
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
+const BASE_URL = (globalThis as any).ENV_API || import.meta.env.VITE_API || 'http://localhost:8000';
+
+export const api = createApi({
+  reducerPath: 'api',
+  baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
+  tagTypes: ['Transactions', 'Categories'],
+  endpoints: (builder) => ({
+    getTransactions: builder.query<any[], void>({
+      query: () => '/transactions',
+      providesTags: ['Transactions']
+    }),
+    ingestCsv: builder.mutation<{ imported: number }, FormData>({
+      query: (body) => ({ url: '/transactions/ingest/csv?mapping_name=sample_bank&account_id=acc_demo&user_id=user_demo', method: 'POST', body }),
+      invalidatesTags: ['Transactions']
+    }),
+    getCategories: builder.query<any[], void>({ query: () => '/categories' })
+  })
+});
+
+export const { useGetTransactionsQuery, useIngestCsvMutation, useGetCategoriesQuery } = api;
+```
+
+**web/src/App.tsx**
+
+```tsx
+import { useGetTransactionsQuery, useIngestCsvMutation } from './store/services/api';
+import { useState } from 'react';
+
+export default function App() {
+  const { data: tx = [], isLoading } = useGetTransactionsQuery();
+  const [ingest, { isLoading: uploading }] = useIngestCsvMutation();
+  const [file, setFile] = useState<File | null>(null);
+
+  const onUpload = async () => {
+    if (!file) return;
+    const fd = new FormData();
+    fd.append('file', file);
+    await ingest(fd).unwrap();
+    setFile(null);
+  };
+
+  return (
+    <main style={{ maxWidth: 900, margin: '2rem auto', fontFamily: 'ui-sans-serif' }}>
+      <h1>Self Finance — Prototype</h1>
+      <section style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: 8, marginBottom: 24 }}>
+        <h2>Import CSV</h2>
+        <input type="file" accept=".csv" onChange={e => setFile(e.target.files?.[0] || null)} />
+        <button onClick={onUpload} disabled={!file || uploading} style={{ marginLeft: 8 }}>Upload</button>
+      </section>
+      <section>
+        <h2>Transactions {isLoading ? '(loading...)' : ''}</h2>
+        <ul>
+          {tx.map(t => (
+            <li key={t.id}>
+              {new Date(t.posted_at).toLocaleDateString()} — {t.description_raw} — {t.amount}
+            </li>
+          ))}
+        </ul>
+      </section>
+    </main>
+  );
+}
+```
+
+### Run instructions (frontend)
+
+* In a new Replit shell tab: `cd web && npm i && npm run dev`
+* Preview on **5173**. Ensure the API is running on **8000** (from the main Run button). If needed, set `VITE_API` in `web/.env`.
+
+---
+
+## 📦 Export & Continue Offline
+
+1. **Download as ZIP** from Replit.
+2. Swap to Postgres by setting `DATABASE_URL=postgresql+psycopg://app:app@db:5432/app` and adding `psycopg[binary]` to **requirements.txt**.
+3. Use the included **Docker** files:
+
+**Dockerfile**
+
+```Dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY app ./app
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+**docker-compose.yml**
+
+```yaml
+version: "3.9"
+services:
+  api:
+    build: .
+    environment:
+      - DATABASE_URL=postgresql+psycopg://app:app@db:5432/app
+    ports: ["8000:8000"]
+    depends_on: [db]
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata: {}
+```
+
+**Makefile** (convenience)
+
+```Makefile
+run:
+	uvicorn app.main:app --reload --port 8000
+
+import:
+	curl -s -X POST -F "file=@data/sample.csv" \
+	  "http://localhost:8000/transactions/ingest/csv?mapping_name=sample_bank&account_id=acc_demo&user_id=user_demo" | jq
+```
+
+---
+
+## 🧭 Next tasks for Replit AI
+
+Ask Replit AI to:
+
+1. **Generate all files** listed in this Project.md. Create missing folders.
+2. Ensure `.replit`, `replit.nix`, and `start.sh` exist and are correct.
+3. Make `start.sh` executable and run. Open `/docs`.
+4. Seed two categories (`Groceries`, `Fuel`) and two rules (patterns `new world|countdown|pak n save`, `z energy|bp|caltex|mobil`).
+5. Upload `data/sample.csv` and test the ingest endpoint.
+
+---
+
+## 🛣️ Stretch goals after the prototype
+
+* Add **tx categorisation** write-back endpoint (`PATCH /transactions/{id}`)
+* Budget envelopes and overspend alerts
+* Simple auth (API key header)
+* Property & mortgage tables; amortisation endpoint
+* Holdings & daily prices (CSV), XIRR calculation
+
+---
+
+**That’s it.** Paste this entire file into Replit and say: *“Build this project as specified.”* Then we can iterate on features (budgets, FIRE dashboards, property, investments) and switch to Postgres offline when you’re ready.
